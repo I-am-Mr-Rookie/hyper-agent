@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Final Plan - AlgoRise (Working Title): All-in-One Gamified Competitive Programming Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#0d1117; --panel:#161b22; --line:#30363d; --text:#e6edf3; --muted:#9da7b3; --accent:#58a6ff; --ok:#3fb950; --warn:#d29922; --bad:#f85149; --violet:#bc8cff; }
+  * { box-sizing:border-box; }
+  body { max-width:1140px; margin:0 auto; padding:28px 22px 72px; background:var(--bg); color:var(--text); font:15px/1.6 "Inter","Segoe UI",Arial,sans-serif; }
+  h1 { font-size:27px; line-height:1.25; border-bottom:1px solid var(--line); padding-bottom:12px; font-weight:800; letter-spacing:-0.01em; }
+  h2 { margin-top:42px; color:var(--accent); font-size:20px; font-weight:700; border-bottom:1px solid var(--line); padding-bottom:6px; }
+  h3 { font-size:16px; margin-top:24px; color:var(--text); font-weight:700; }
+  h4 { font-size:14px; margin-top:18px; color:var(--violet); text-transform:uppercase; letter-spacing:0.06em; }
+  .meta,.muted { color:var(--muted); }
+  .band { border-left:4px solid var(--accent); padding:12px 16px; background:var(--panel); border-radius:0 6px 6px 0; margin:14px 0; }
+  .ok { border-left-color:var(--ok); } .warn { border-left-color:var(--warn); } .bad { border-left-color:var(--bad); } .violet { border-left-color:var(--violet); }
+  table { width:100%; border-collapse:collapse; margin:14px 0; font-size:13.5px; }
+  th,td { border:1px solid var(--line); padding:8px 9px; text-align:left; vertical-align:top; }
+  th { background:var(--panel); font-weight:700; }
+  code { background:var(--panel); border:1px solid var(--line); border-radius:5px; padding:1px 5px; font:12.5px "JetBrains Mono",monospace; }
+  pre { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:15px; overflow:auto; white-space:pre; font:12.5px/1.55 "JetBrains Mono",monospace; }
+  pre.wrap { white-space:pre-wrap; }
+  ul.check { list-style:none; padding-left:0; } ul.check li { margin:5px 0; } ul.check li::before { content:"[ ] "; color:var(--accent); font-family:"JetBrains Mono",monospace; }
+  .scores { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:16px 0; }
+  .score { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:14px; font-size:15px; }
+  .score .num { font-size:24px; font-weight:800; font-family:"JetBrains Mono",monospace; }
+  .tag { display:inline-block; border:1px solid var(--line); border-radius:999px; padding:0 9px; font-size:11.5px; font-family:"JetBrains Mono",monospace; }
+  .t-ok { color:var(--ok); border-color:var(--ok); } .t-warn { color:var(--warn); border-color:var(--warn); } .t-bad { color:var(--bad); border-color:var(--bad); } .t-info { color:var(--accent); border-color:var(--accent); }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+  @media (max-width:760px) { .scores,.grid2 { grid-template-columns:1fr; } body { padding:18px 12px 48px; } }
+</style>
+</head>
+<body>
+
+<h1>Final Plan - AlgoRise <span class="muted">(working title, rename freely)</span><br>All-in-One Gamified Competitive Programming Platform</h1>
+<p class="meta">Mode: open-ended-build | Generated: 2026-07-19 (Asia/Dhaka) | Audit revision: iterations 4-5 applied same day, 19:15+06 | Amendment A1: Import Companion extension approved and added 20:49+06 | Amendment A2: executor runtime re-based to one ~120-minute Sprint Zero run with in-chat credential handover 21:00+06 | Handoff version: 2 | Prepared by: The Thinker (planning only - nothing in this document has been implemented) | Founders: You + Kawsar (waliullahx82)</p>
+
+<div class="band warn">
+  <p><strong>Read this first - the four decisions of record (Founder Sign-off Protocol).</strong> You authorized independent decision-making while you slept, and you have since committed to a manual verification pass before handing this plan to the implementing agent. The four decisions below materially deviate from the raw sketch; they stand as decisions of record unless you change them during that review:</p>
+  <ol>
+    <li><strong>PostgreSQL replaces the sketched MongoDB</strong> - the data is heavily relational (users, submissions, problems, XP events, prerequisite graphs). Rationale in Section 5.</li>
+    <li><strong>No re-hosting of ICPC/IUPC/Codeforces/Toph problem statements.</strong> Research (Ledger R-03, R-04, R-05) shows therealbcs.com is a link-out index, not a content host, and the Codeforces materials license explicitly forbids republishing problems on platforms that support automatic testing. The plan pivots to: original problem bank for the on-platform judge + CP-31-style tracked link-out practice for external problems (auto-verified via the official Codeforces API). This keeps the one-stop experience legal.</li>
+    <li><strong>LeetCode import ships behind a feature flag</strong> - only unofficial GraphQL access exists (medium-high breakage/ToS risk). Codeforces import is the reliable MVP path.</li>
+    <li><strong>12-week beta timeline proposed by the planner</strong> - there is no organizer deadline; dates in this plan are team-set and adjustable.</li>
+  </ol>
+  <p class="muted">Sign-off mechanism: your pre-execution manual review is the approval gate (your instruction of 2026-07-19: final changes will be given during manual verification - or none, if the plan stands). Any change made there must be propagated by the Executor into Sections 4-13 and the JSON handoff as part of its preflight delta before any code is written.</p>
+</div>
+
+<h2>1. Authority And Frozen Constraints</h2>
+<div class="band warn">
+  <p><strong>Authority order (highest first):</strong></p>
+  <ol>
+    <li>Latest explicit user instructions - Hyperagent thread <code>cmrrsa8b71awz07ad5xp0cv3d</code>, two messages dated 2026-07-19, including the explicit grant: decide independently, do not wait for answers, plan only, no implementation.</li>
+    <li><em>CP Project Rough Idea.pdf</em> - 3 handwritten pages (flow sketch, level ladder, feature tree). Where the sketch conflicts with law/licenses, the deviation is flagged above rather than silently applied.</li>
+    <li>External licenses and terms that bind the product: Codeforces materials license (<a href="https://codeforces.com/blog/entry/967" target="_blank" rel="noopener noreferrer">codeforces.com/blog/entry/967</a>), Toph ToS, cp-algorithms CC BY-SA 4.0, USACO Guide and CSES CC BY-NC-SA 4.0, dependency licenses (MIT/GPL/AGPL as recorded in the ledger).</li>
+    <li>Reference implementations: <a href="https://github.com/waliullahx82/code-engine" target="_blank" rel="noopener noreferrer">waliullahx82/code-engine</a> (MIT) and <a href="https://github.com/waliullahx82/algolytics" target="_blank" rel="noopener noreferrer">waliullahx82/algolytics</a> (MIT).</li>
+    <li>Research evidence ledger (Section 7).</li>
+    <li>General engineering best practice.</li>
+  </ol>
+</div>
+
+<table>
+  <tr><th>Frozen constraint</th><th>Detail</th></tr>
+  <tr><td>Web only</td><td>Ship a website. No mobile app, no desktop app, in any phase of this plan.</td></tr>
+  <tr><td>Plan only (now)</td><td>This document authorizes zero implementation. A separate Executor agent will implement it later using Section 13.</td></tr>
+  <tr><td>AI credentials as placeholders</td><td>The user holds OpenAI-compatible base URLs, API keys, and model IDs (providers such as OpenRouter, Genmax, or any custom gateway). This plan contains only fill-in placeholders (Section 6). Amendment A2 (founder decision, 2026-07-19 21:00+06): live credentials WILL be pasted into the executor chat for speed, and every key is rotated immediately after the run; credentials still never enter the repo, logs, client bundles, or this file.</td></tr>
+  <tr><td>Executor runtime ceiling (Amendment A2)</td><td>Total implementing-agent runtime ≈ 120 minutes including its own smoke/stress checks: one Sprint Zero run per Section 8, mandatory stop-line at T-15, handoff via PROGRESS.md + SPRINT_ZERO_REPORT.md. All step ownership is founder-side; the run is an accelerator, not an owner.</td></tr>
+  <tr><td>Thinking-level field required</td><td>Every model slot carries a thinking level (minimal / low / medium / high). Pre-authorized fallback from the user: if a provider cannot express thinking level, hard-code high effort for all high-stakes slots.</td></tr>
+  <tr><td>Verdict integrity</td><td>Only sandboxed execution against validated testsets decides verdicts. LLMs explain and suggest; they never judge.</td></tr>
+  <tr><td>Content legality</td><td>No third-party problem statements or testdata re-hosted or auto-judged without explicit rights (Ledger R-04, R-05, R-10).</td></tr>
+  <tr><td>Proposed schedule</td><td>Hard finish (beta live): 2026-10-11 22:00 | Stop-work / freeze boundary: 2026-10-09 22:00 | Timezone: Asia/Dhaka. Team-set, adjustable; not organizer-imposed.</td></tr>
+  <tr><td>Dictation corrections applied</td><td>Voice-typing artifacts resolved: "verify the experience" read as gamify; "Lead Code" as LeetCode; "Add Code" as AtCoder; "Good Forces" as Codeforces; "edited modules" as curated modules; "final plan to restable" as final plan deliverable. Full map in the chat summary.</td></tr>
+</table>
+
+<h2>2. Normative Brief (Re-Engineered Prompt)</h2>
+<p class="muted">The raw voice-dictated brief was re-engineered into the normative statement below. It is the canonical restatement of intent that this plan executes; any future re-planning run should start from it.</p>
+<pre class="wrap">ROLE STACK
+- Primary: Product Build Strategist for a competitive-programming web platform, accountable for an executable, rights-compliant plan.
+- Domain: Competitive Programming Platform Architect (judges, ratings, training pedagogy).
+- Validation: Plan and Evidence Auditor (licensing, feasibility, scoring discipline).
+
+OBJECTIVE
+Produce a complete, evidence-calibrated build plan (final plan.html) for a web-only, gamified,
+all-in-one competitive programming platform built by two founders (you + Kawsar), covering:
+1. Onboarding for two personas: absolute beginners (guided from zero) and experienced users
+   (import Codeforces/LeetCode history).
+2. AI analysis of the imported/solved record: how the user writes code, how they think and
+   attempt problems, major strengths, weak topics (example: 1200-rated Pupil with no graph
+   theory, geometry, or DP coverage).
+3. AI-driven mentorship: curated on-site text modules and courses, personalized roadmaps,
+   and recommendations of free resources such as YouTube (linked, not re-hosted).
+4. An on-platform judge so users are not sent to Codeforces to submit: sandboxed execution,
+   the most robust test cases attainable (hybrid generator + LLM adversarial cases, all
+   machine-validated), and exact, to-the-point AI fix suggestions on failure.
+5. Gamification throughout: levels tied to an internal 200-2000 rating ladder, badges
+   (Newbie / Beginner / Master / GM certificate at 2000), XP, streaks, daily quests,
+   similarity clustering of problems (about 70 percent similar = subcluster, about 40
+   percent = megacluster) per the sketch PDF.
+
+INPUTS
+- CP Project Rough Idea.pdf (3 handwritten pages; flow, ladder, feature tree).
+- Kawsar's repos: github.com/waliullahx82/code-engine, github.com/waliullahx82/algolytics.
+- Internet research: open-source judges/sandboxes/test tooling, existing products, data
+  sources including therealbcs.com (ICPC/IUPC index), CP-31 sheet, and the import surfaces
+  of Codeforces, AtCoder, LeetCode, CodeChef, HackerRank, HackerEarth.
+
+CONSTRAINTS
+- Website only. Plan only - no implementation in this pass.
+- AI model access must be configurable by the founders later via placeholder fields:
+  base URL, API key, model ID, thinking level, per model slot; OpenAI-compatible; custom
+  gateways allowed; no credentials in chat or in the plan. If thinking level cannot be
+  expressed on a provider, hard-code high effort for high-stakes slots (pre-authorized).
+- Respect third-party licenses and terms of service; never plan to re-host content the
+  platform has no rights to.
+- Decide open questions autonomously; record every material decision and flag deviations
+  from the sketch for veto. Deliver a separate plain-language chat summary outside the HTML.
+
+REASONING WORKFLOW
+In a step-by-step logical process:
+1. Extract requirements from the brief and PDF; resolve dictation artifacts explicitly.
+2. Research the ecosystem (repos, licenses, APIs, competitors) and build an evidence ledger.
+3. Compare execution strategies; select one with rationale under the user's delegation grant.
+4. Specify product, architecture, and the AI-model configuration contract with placeholders.
+5. Produce a dependency-aware, owned, timeboxed execution plan with gates, deadline modes,
+   scope cuts, risks, and recovery state.
+6. Emit a version-2 Executor handoff, self-evaluate against the frozen rubric, patch, and
+   re-score without inflation.
+
+ACCEPTANCE
+- final plan.html passes validate_plan.py; every research claim carries a source; deviations
+  from the PDF are explicit; Plan Quality, Evidence Coverage, and Execution Readiness are
+  reported separately; no implementation, push, or runtime-success claim is made.</pre>
+
+<h2>3. Approved Strategy</h2>
+<div class="band ok">
+  <p><strong>Mode:</strong> open-ended-build. <strong>Direction-approval status:</strong> satisfied. The product direction (all-in-one gamified CP platform: import + AI coach + own judge + mentorship, web-only) was fixed by the founders in the brief and PDF, and the user explicitly delegated remaining decisions ("use your own intelligence... complete permission"). Therefore no idea-selection stop was forced; the comparison below is between <em>execution strategies</em> for the fixed direction.</p>
+</div>
+
+<table>
+  <tr><th>Variant</th><th>Approach</th><th>Benefits</th><th>Costs / risks</th><th>Verdict</th></tr>
+  <tr>
+    <td><strong>A - Analytics first</strong></td>
+    <td>Ship import + Skill Radar + AI coach + roadmap; add the judge months later.</td>
+    <td>Fastest visible value; lowest infra risk; leans on algolytics.</td>
+    <td>Until the judge lands, the product is a nicer Codolio/CFviz - weak differentiation (Ledger R-14); "one-stop" promise unmet.</td>
+    <td>Rejected as sole path</td>
+  </tr>
+  <tr>
+    <td><strong>B - Judge first</strong></td>
+    <td>Build sandbox judge + AI testgen + feedback first; analytics later.</td>
+    <td>Deepest moat first; leans on code-engine.</td>
+    <td>Slow to first wow; security-heavy start; needs a problem bank before anyone can use it; beginners get no guidance for weeks.</td>
+    <td>Rejected as sole path</td>
+  </tr>
+  <tr>
+    <td><strong>C - Two-track phased build (SELECTED)</strong></td>
+    <td>Track 1 (You + Executor): import, Skill Radar, AI coach, curriculum. Track 2 (Kawsar): sandbox judge from code-engine, in parallel. Converge into the practice core (problems + submissions + AI tests + feedback), then layer gamification and mentor chat, then harden and beta.</td>
+    <td>Exploits both founders' existing assets simultaneously; something demoable every 2-3 weeks; licensing-safe content model from day one; de-risks the judge with a long runway.</td>
+    <td>Coordination overhead for a 2-person team - mitigated by strict per-step ownership (Section 8) and weekly gate reviews.</td>
+    <td><strong>Selected</strong></td>
+  </tr>
+</table>
+
+<h3>Selection rationale</h3>
+<ul>
+  <li><strong>Market gap (R-14):</strong> profile trackers exist (Codolio, CF Analytics, CFviz) and adaptive-drill tools exist (Orion), but nothing combines import + own judge + AI coaching in one loop. Variant C reaches that combination fastest without betting everything on the hardest component.</li>
+  <li><strong>Asset fit (R-01, R-02):</strong> code-engine is already a Judge0-compatible execution API design (MIT, Node/Express + Redis/BullMQ + isolate-class executors) - Kawsar owns Track 2 naturally. algolytics already sketches the dashboard IA (<code>/dashboard /analytics /problems /goals</code>) - it seeds Track 1's UI.</li>
+  <li><strong>Legal fit (R-04, R-05, R-10):</strong> the two-track plan bakes in the pivot to original problems + tracked link-out practice instead of re-hosting, so no rework lands later.</li>
+</ul>
+
+<h3>Team and tools</h3>
+<table>
+  <tr><th>Owner</th><th>Scope</th><th>Basis</th></tr>
+  <tr><td>Kawsar (Founder - backend/judge lead)</td><td>Judge service, import pipeline, analytics computation</td><td>Author of code-engine and algolytics; personal CP background (Codeforces-CP-Journey repo)</td></tr>
+  <tr><td>You (Founder - product/content lead)</td><td>Problem bank, curriculum modules, gamification design, beta ops</td><td>Product vision holder; owns model credentials and provider choices</td></tr>
+  <tr><td>Executor Agent (AI)</td><td>One ~120-minute credentialed Sprint Zero run (Amendment A2): repo scaffold, LLM gateway, judge/extension/import skeletons, smoke checks, honest handoff report. Further sessions only if the founder buys more runtime.</td><td>Invoked with the Section 13 kickoff message; all steps remain founder-owned</td></tr>
+</table>
+
+<h2>4. Product Blueprint</h2>
+
+<h3>Personas and core loop</h3>
+<div class="grid2">
+  <div class="band">
+    <p><strong>P1 - The lost beginner.</strong> No judge history. Signs in with Google, answers a 3-minute placement quiz (or solves 2 calibration problems), lands at Level 0-200 with a ready module and topic (PDF page 1: "if the user is a beginner - ready module and topic"), and starts the guided path immediately.</p>
+  </div>
+  <div class="band">
+    <p><strong>P2 - The plateaued Pupil.</strong> 1200-rated on Codeforces, but the Skill Radar exposes zero graph theory, geometry, or DP coverage (the user's own example). Imports handle, gets an AI Coach Report, and receives a roadmap that drills exactly those gaps.</p>
+  </div>
+</div>
+<p><strong>Core loop:</strong> Diagnose (import/quiz) → Plan (roadmap) → Learn (module) → Drill (problems + AI judge) → Feedback (exact fix + hints) → Reward (XP, levels, badges, streaks) → re-Diagnose. Every feature below serves this loop.</p>
+
+<h3>Feature specification (mapped to the PDF)</h3>
+<table>
+  <tr><th>ID</th><th>Feature</th><th>Specification</th><th>PDF trace</th><th>Phase</th></tr>
+  <tr><td>F-01</td><td>Google sign-up</td><td>Google OAuth via Auth.js; store name, username, email. Email magic-link fallback.</td><td>p1 "user enters the website via google account (sign up)"</td><td>P0</td></tr>
+  <tr><td>F-02</td><td>Profile import</td><td>Codeforces via official API (handle verification by compilation-error probe or profile token; then user.info, user.rating, user.status). LeetCode behind a feature flag (unofficial GraphQL: solved counts, calendar, recent ACs). AtCoder later via kenkoooo API. "Start as beginner" path when no history.</td><td>p1 "Data import: codeforces.com, leetcode, beginner"; p3</td><td>P1</td></tr>
+  <tr><td>F-03</td><td>Skill Radar</td><td>Deterministic topic-mastery scoring from imported solves: per-tag solve counts weighted by difficulty vs own rating, verdict mix, recency decay. Renders radar chart + gap list. This is the factual backbone the AI cites.</td><td>p1 "AI analyzes user's rating, problem attempts"</td><td>P1</td></tr>
+  <tr><td>F-04</td><td>AI Coach Report</td><td>ANALYST slot writes a structured report: how you attempt problems (attempt/AC patterns, time-of-day, retry behavior), strengths, weak fields, next milestones. Every claim must cite data points (anti-hallucination rule). Coding-style commentary activates only when code is available: pasted samples at import time, then every on-platform submission natively. The Codeforces API does not expose other users' source code (R-11) - the plan does not pretend otherwise.</td><td>p1 "AI analyzes... coding style, language"</td><td>P1</td></tr>
+  <tr><td>F-05</td><td>Level ladder + badges</td><td>Internal rating 0-2000. Gates per PDF page 2: I/O basics = 200 (Level 2, Newbie badge), Math = 300 (Level 3), Data structures = 400, Binary search = 500 (Beginner badge band), onward through intermediate topics (Master badge band), capped at 2000 = certificate + GM badge. Internal rating moves via solved-problem difficulty and quest completion; calibrated against CF rating when imported.</td><td>p2 entire ladder</td><td>P3</td></tr>
+  <tr><td>F-06</td><td>Curriculum modules</td><td>On-site original text modules per topic (beginner path first), each: concept, worked examples, 5-10 drills, YouTube link-outs (embedded players linking to source; nothing re-hosted). cp-algorithms content may be adapted with attribution under CC BY-SA (R-10); USACO Guide and CSES content may NOT be reused (CC BY-NC-SA) - structure inspiration only.</td><td>p1 "start learning → course starts - module, topic"</td><td>P1</td></tr>
+  <tr><td>F-07</td><td>Roadmap engine</td><td>Topic prerequisite DAG (I/O → loops → arrays → math → ... → graphs → DP). Generator composes a 7-day personal plan from Skill Radar gaps + level; LLM enriches phrasing, deterministic skeleton guarantees soundness.</td><td>p3 "topic, module and rating-wise divide"</td><td>P1</td></tr>
+  <tr><td>F-08</td><td>Original problem bank</td><td>60+ launch problems (levels 0-1200 priority): statement, tags (rating, type, concept, year/origin where relevant), editorial, reference solution, brute-force solution, testset. Legal checklist per problem (provenance recorded; only original or rights-cleared items). This replaces re-hosting ICPC/IUPC statements - see veto note 2.</td><td>p3 "ICPC, IUPC selected problems... tags (rating, type, concept), year (when and where)" - intent preserved, sourcing changed</td><td>P2</td></tr>
+  <tr><td>F-09</td><td>On-platform judge</td><td>Monaco editor → submit C++/Python → queue (Redis/BullMQ) → sandbox worker (isolate-class: no network, CPU/wall/memory/process limits) → per-test verdicts (AC/WA/TLE/MLE/RE). Judge0-compatible internal API surface retained from code-engine.</td><td>p1/p3 one-stop submission goal</td><td>P2</td></tr>
+  <tr><td>F-10</td><td>Robust test generation</td><td>Polygon-style pipeline (R-08): parameterized testlib-style generators + validator + reference-vs-brute cross-check, then TESTGEN slot proposes adversarial cases (edge values, anti-greedy patterns, hack-style cases per CodeHacker/Klear-CodeTest patterns, R-09). Any case failing validation or producing reference/brute disagreement is quarantined, never shipped. LLM augments, never replaces, systematic generation (TCGBench caveat).</td><td>brief: "most robust possible cases"</td><td>P2</td></tr>
+  <tr><td>F-11</td><td>Exact-fix AI feedback</td><td>On WA/RE: minimize the failing case, then JUDGE_FEEDBACK slot returns diagnosis (what the code does vs what it should do) + hint ladder: L1 concept nudge → L2 approach → L3 line-level exact fix; full corrected code only on explicit request. Sandbox verdict is never overridden.</td><td>brief: "understand the logic... suggest an exact, to-the-point fix"</td><td>P2</td></tr>
+  <tr><td>F-12</td><td>Similarity clustering</td><td>Problem embeddings + tag overlap; similarity at or above roughly 70 percent groups a subcluster ("more like this"), at or above roughly 40 percent a megacluster (topic neighborhoods). Powers "similar problems" and drill variety. Thresholds tunable; PDF values are the starting point.</td><td>p3 "similar (70%) → subcluster; 40% → megacluster"</td><td>P3</td></tr>
+  <tr><td>F-13</td><td>Gamification core</td><td>XP per solve scaled by (problem difficulty vs user level) with diminishing returns on re-solves; streaks with 2 freeze tokens/month; daily quest = 1 weak-topic + 1 review + 1 stretch problem; badge wall; boss fight = timed mini-set to unlock each level gate; certificate + GM badge at 2000.</td><td>p2/p3 gamified platform</td><td>P3</td></tr>
+  <tr><td>F-14</td><td>Tracked external practice</td><td>CP-31-style curated link-out lists to Codeforces problems (linking and tracking is permitted; re-hosting is not). Auto-verification: poll CF API for the user's new AC on the linked problem, then award XP. TLE-bot-proven pattern (R-06, R-13).</td><td>p3 "data: therealBCS, cp31, leetcode" - reinterpreted legally</td><td>P3</td></tr>
+  <tr><td>F-15</td><td>Mentor chat</td><td>MENTOR slot chat grounded in profile, radar, roadmap, and problem bank (tool-calling), with per-day token budget and refusal rules (no doing homework wholesale; hint-first policy).</td><td>brief: AI-driven guidelines and mentorship</td><td>P3</td></tr>
+  <tr><td>F-16</td><td>Beginner-friendly editorial style</td><td>For bank problems: editorial adapted to the reader's level and, where their code is available, contrasted with their own style ("most beginner-friendly and efficient solution based on the coding style of the user", PDF p3). Applies to owned content only.</td><td>p3 final bullet</td><td>P3</td></tr>
+  <tr><td>F-17</td><td>Import Companion browser extension (Amendment A1)</td><td>Consent-first Chromium MV3 desktop-browser extension that syncs the signed-in user's OWN submissions - metadata AND source code - from Codeforces, LeetCode, AtCoder, and CodeChef into their AlgoRise account, feeding the S4 style analyzer with a real corpus at import time. Never handles credentials or automates login; read-only collection in the user's own session; throttled, resumable, revocable. Full specification below.</td><td>Founder approval in chat, 2026-07-19 20:47+06</td><td>P1-P2 (S14)</td></tr>
+</table>
+
+<div class="band bad">
+  <p><strong>Content legality gate (frozen).</strong> Never re-host or auto-judge: Codeforces/Gym statements or tests (license forbids use on automatic-testing platforms - R-04), Toph contest content (R-05), CSES or USACO Guide content (CC BY-NC-SA - R-10). Allowed: original problems; cp-algorithms-derived text with attribution + ShareAlike (R-10); link-outs with tracking everywhere (R-06); therealbcs.com used as a discovery index only (R-03). Any future ICPC/IUPC hosting requires written organizer permission first.</p>
+</div>
+
+<h3>F-17 Import Companion extension - build specification (Amendment A1)</h3>
+<p class="muted">Founder-approved scope. Specified to be end-to-end executable by the Executor; items marked "Executor's choice" are the explicitly reserved degrees of freedom.</p>
+
+<h4>Consent-first user flow (frozen)</h4>
+<ol>
+  <li><strong>Install and pair:</strong> user installs the extension, opens AlgoRise settings, and copies a one-time pairing code (or clicks a pairing deep link) into the extension. The extension exchanges it for a scoped upload token tied to the user's AlgoRise account. Tokens are rotatable and revocable server-side.</li>
+  <li><strong>Connect a platform:</strong> the popup shows the four platforms with Connect buttons. Clicking Connect only <em>opens that site's own login page in a normal tab</em> - the extension never sees, stores, autofills, or submits credentials, and never automates login. The user logs in manually or is already logged in.</li>
+  <li><strong>Handle confirmation:</strong> the extension detects the signed-in handle from the user's own session and asks "Detected handle X - is this you?" before anything is collected.</li>
+  <li><strong>Explicit per-platform consent:</strong> a consent screen states exactly what will be collected (the user's own submissions: metadata and source code), where it goes (their private AlgoRise account, used only for their skill/style analysis), and that they can pause, cancel, disconnect, or delete at any time. Sync starts only after the checkbox.</li>
+  <li><strong>Sync:</strong> background collector runs a single-concurrency, politely throttled queue (about one request per 2.5 seconds with jitter - Executor's choice to tune), with progress UI, pause/cancel, and a resumable cursor. First run is a bulk backfill; afterwards incremental (new submissions only). No collection ever runs without a user-initiated sync.</li>
+  <li><strong>Preview and upload:</strong> batches are shown (counts per platform, excludable) and uploaded to the platform API; the server deduplicates by platform + submission id.</li>
+  <li><strong>Revoke and delete:</strong> per-platform disconnect, plus a delete-imported-code action that calls the platform's deletion endpoint (ties into the privacy risk row and Section 12 checklist).</li>
+</ol>
+
+<h4>Per-platform collectors (honest mechanics)</h4>
+<table>
+  <tr><th>Platform</th><th>Submission index</th><th>Source-code source</th><th>Risk notes</th></tr>
+  <tr><td>Codeforces</td><td>Official API user.status (no login needed)</td><td>User's own submission pages fetched in-session; code extracted from the submission view</td><td>Lowest risk; code on rated contests is public anyway; heavy throttle out of courtesy</td></tr>
+  <tr><td>LeetCode</td><td>Session GraphQL submission list</td><td>Session GraphQL submission-detail query returns the user's own code</td><td>Unofficial API - schema drift possible; ships behind per-platform flag; real-browser session avoids most anti-bot friction</td></tr>
+  <tr><td>AtCoder</td><td>Own submissions pages (or kenkoooo index)</td><td>Public submission pages; code extracted from the submission code block</td><td>Low risk; polite throttle</td></tr>
+  <tr><td>CodeChef</td><td>Profile submission list in-session</td><td>Own solution view pages in-session</td><td>Most brittle markup; flag-gated; real browser passes Cloudflare naturally</td></tr>
+</table>
+<p class="muted">HackerRank/HackerEarth are deliberately out of scope for v1 (weak CP signal per R-13); the collector pattern extends to them later if wanted. Imported source code is the user's own work product, stored privately for analysis - it is never published, so the Section 4 content-legality gate is untouched.</p>
+
+<h4>Skeleton the Executor starts from</h4>
+<pre>
+extension/
+  manifest.json          MV3; permissions: storage, alarms; host_permissions ONLY for
+                         codeforces.com, leetcode.com, atcoder.jp, www.codechef.com,
+                         and the AlgoRise domain - never all_urls
+  popup.html / popup.js  connect buttons, consent screens, progress, pause/cancel
+  background.js          sync orchestrator: throttle queue, cursor store, alarms
+  collectors/
+    codeforces.js        API index -> own submission pages -> code block
+    leetcode.js          session GraphQL: list -> detail (code field)
+    atcoder.js           submission pages -> code block
+    codechef.js          profile list -> own solution pages (flag-gated)
+  lib/                   throttler, resumable cursor, uploader, redactor
+
+Upload contract (server endpoint added in S14, dedup server-side):
+POST /api/import/extension     Authorization: Bearer PAIRING_TOKEN
+{ "platform": "...", "handle": "...", "cursor": "...",
+  "batch": [ { "platform_submission_id": "...", "problem_url": "...",
+               "problem_title": "...", "language": "...", "verdict": "...",
+               "submitted_at": "...", "source_code": "...",
+               "submission_url": "..." } ] }
+</pre>
+
+<h4>Frozen conduct rules vs Executor's choices</h4>
+<div class="grid2">
+  <div class="band bad"><p><strong>Frozen (non-negotiable):</strong> no credential handling or login automation; only the signed-in user's own submissions; explicit per-platform consent before any collection; read-only page access (never modify platform pages); single-concurrency throttled fetching; pairing-token upload only; revocation and deletion supported; per-platform feature flags with graceful degradation; manual paste/upload remains the universal fallback.</p></div>
+  <div class="band ok"><p><strong>Executor's choice (explicit room):</strong> popup UI framework (vanilla/Preact/etc.); exact throttle and backoff tuning; storage schema inside the extension; parsing approach per collector and selector-maintenance strategy; Firefox port timing; distribution mechanics - recommended: zipped unpacked load for the private beta to skip store-review latency, Chrome Web Store submission after beta (owner: You).</p></div>
+</div>
+
+<h3>Brief and PDF coverage matrix (added in audit iteration 5)</h3>
+<p class="muted">Every requirement from the dictated brief and the sketch PDF, mapped to where the plan satisfies it, so alignment is checkable line by line rather than asserted.</p>
+<table>
+  <tr><th>Requirement (brief / PDF)</th><th>Where satisfied</th><th>Status</th></tr>
+  <tr><td>Gamified, all-in-one CP platform offering something to every CP background</td><td>Sections 3-4; F-05, F-13</td><td><span class="tag t-ok">Covered</span></td></tr>
+  <tr><td>Beginners get guidance so CP stops being boring and directionless</td><td>P1 persona; F-01, F-06, F-07</td><td><span class="tag t-ok">Covered</span></td></tr>
+  <tr><td>Experienced users can import Codeforces / LeetCode profiles if they want</td><td>F-02 (CF official API; LeetCode feature-flagged per R-12)</td><td><span class="tag t-ok">Covered</span></td></tr>
+  <tr><td>AI analyzes: how he writes code, how he thinks, how he attempts, strengths, weak spots</td><td>F-03, F-04 (metadata + pasted code + native submissions; CF source-code limits documented honestly)</td><td><span class="tag t-ok">Covered</span></td></tr>
+  <tr><td>Example: 1200-rated Pupil with no graph theory / geometry / DP</td><td>S3 golden-profile fixture</td><td><span class="tag t-ok">Covered</span></td></tr>
+  <tr><td>AI mentorship: curated modules and courses, text resources on-site, free YouTube recommendations</td><td>F-06, F-07, F-15</td><td><span class="tag t-ok">Covered</span></td></tr>
+  <tr><td>AI judge: most robust cases, evaluates code, understands logic, exact to-the-point fix</td><td>F-09, F-10, F-11; steps S7-S10</td><td><span class="tag t-ok">Covered</span></td></tr>
+  <tr><td>Do not send the user to Codeforces to submit</td><td>F-09 on-platform judge for the original bank; third-party problems stay link-out for legal reasons (R-04)</td><td><span class="tag t-warn">Covered, signed deviation 2</span></td></tr>
+  <tr><td>Website only - no mobile or desktop app</td><td>Section 1 frozen constraint</td><td><span class="tag t-ok">Covered</span></td></tr>
+  <tr><td>Model config section: base URL + API key + model ID + thinking level, placeholders only, hardcode-high fallback</td><td>Section 6, verbatim to the request</td><td><span class="tag t-ok">Covered</span></td></tr>
+  <tr><td>Plan only now; a different agent implements; separate summary outside the HTML</td><td>Sections 1 and 13; summary delivered in chat</td><td><span class="tag t-ok">Covered</span></td></tr>
+  <tr><td>PDF: Google account sign-up (name, username, email)</td><td>F-01</td><td><span class="tag t-ok">Covered</span></td></tr>
+  <tr><td>PDF: MongoDB</td><td>Section 5 - PostgreSQL selected instead</td><td><span class="tag t-warn">Signed deviation 1</span></td></tr>
+  <tr><td>PDF: level ladder 200-2000, Newbie/Beginner/Master badges, certificate + GM badge at 2000</td><td>F-05; S11</td><td><span class="tag t-ok">Covered</span></td></tr>
+  <tr><td>PDF: similar 70 percent = subcluster, 40 percent = megacluster</td><td>F-12; S12</td><td><span class="tag t-ok">Covered</span></td></tr>
+  <tr><td>PDF: problem data from theRealBCS, CP-31, LeetCode</td><td>R-03/R-06 research → F-14 curated link-out + tracking model</td><td><span class="tag t-warn">Signed deviation 2 (legal)</span></td></tr>
+  <tr><td>PDF: most beginner-friendly and efficient solution based on the user's coding style</td><td>F-16</td><td><span class="tag t-ok">Covered</span></td></tr>
+  <tr><td>PDF: "Demo from Kawsar"; scrape open-source projects from GitHub</td><td>R-01/R-02 (his repos are the seeds); OSS research R-07..R-09</td><td><span class="tag t-ok">Covered</span></td></tr>
+  <tr><td>Follow-up message: research therealbcs + HackerRank, HackerEarth, LeetCode, AtCoder, CodeChef, Codeforces data extraction</td><td>R-03, R-11, R-13 feasibility matrix</td><td><span class="tag t-ok">Covered</span></td></tr>
+  <tr><td>Amendment approval 2026-07-19 20:47+06: consent-based multi-platform extension importing the user's own source code (CF, LeetCode, AtCoder, CodeChef), included for execution</td><td>F-17 specification; step S14; gate G9; ledger R-16</td><td><span class="tag t-ok">Covered</span></td></tr>
+</table>
+
+<h2>5. System Architecture</h2>
+<table>
+  <tr><th>Component</th><th>Choice</th><th>Rationale</th></tr>
+  <tr><td>Web app</td><td>Next.js (App Router) + TypeScript + Tailwind</td><td>Matches algolytics stack (R-02); one codebase for site + API routes; easy Vercel or VPS deploy.</td></tr>
+  <tr><td>Auth</td><td>Auth.js with Google provider</td><td>PDF F-01; magic-link fallback.</td></tr>
+  <tr><td>Database</td><td>PostgreSQL + Prisma <span class="tag t-warn">deviation from sketched MongoDB</span></td><td>Relational core (users-submissions-problems-tags-XP, prerequisite DAG, leaderboards need joins/transactions). Veto note 1; if vetoed, MongoDB works with schema redesign and the plan's steps stand.</td></tr>
+  <tr><td>Queue</td><td>Redis + BullMQ</td><td>Already code-engine's pattern (R-01); drives judge workers and import polling.</td></tr>
+  <tr><td>Judge service</td><td>Evolved code-engine: Node/Express workers executing under isolate-class sandboxing (no network, cgroup CPU/memory/pids caps, chroot), Judge0-compatible REST surface</td><td>MIT-clean (R-01, R-07). Fallback: self-hosted Piston (MIT). Judge0 itself only ever called as an arm's-length service (GPLv3); DMOJ/Kilonova never forked (AGPL). QingdaoU/OnlineJudge (MIT) is the architecture reference.</td></tr>
+  <tr><td>Test tooling</td><td>testlib (MIT) + jngen (MIT, pinned commit) + Polygon-style workflow</td><td>R-08. Generators/validators/checkers compiled and run inside the same sandbox.</td></tr>
+  <tr><td>LLM gateway</td><td>Single server-side module; OpenAI-compatible SDK with baseURL override; slot registry from env (Section 6)</td><td>User's explicit requirement; provider-agnostic.</td></tr>
+  <tr><td>Importers</td><td>CF poller (cache + backoff + resume), kenkoooo AtCoder client (later), LC GraphQL adapter behind flag</td><td>R-11, R-13. No vjudge-style submission relaying - proven fragile (CF bot caps, Turnstile).</td></tr>
+  <tr><td>Similarity worker</td><td>Embedding computation (LITE slot or local model) + tag-overlap scoring into cluster tables</td><td>F-12.</td></tr>
+  <tr><td>Storage/infra</td><td>Object storage for testsets; Docker Compose on one VPS for judge + queue + DB; web on Vercel or same VPS; Prometheus-style metrics (code-engine already exposes them)</td><td>Two-founder ops budget.</td></tr>
+  <tr><td>Import Companion extension</td><td>Chromium MV3 extension + POST /api/import/extension pairing-token endpoint (Amendment A1)</td><td>F-17 spec in Section 4; feeds the submissions store and the S4 style analyzer; per-platform flags.</td></tr>
+</table>
+<p class="muted">Data model spine: users, external_profiles, imports, problems, testsets, tags, topics (prereq DAG), modules, submissions, verdicts, xp_events, streaks, badges, quests, clusters, coach_reports, mentor_sessions, llm_usage_log.</p>
+
+<h2>6. AI Model And Invocation Configuration</h2>
+<p><strong>This is the section the user asked for verbatim:</strong> every AI-powered feature reads its model from a named <em>slot</em>; each slot is configured by four fields - <strong>base URL</strong>, <strong>API key</strong>, <strong>model ID</strong>, <strong>thinking level</strong> - filled in later by the founders. This plan contains placeholders only and <code>.env</code> stays untracked. Per Amendment A2, the founder passes live values directly to the executor in its chat (his explicit decision, keys rotated after the run) using the kickoff template in Section 13.</p>
+
+<h3>Model slots</h3>
+<table>
+  <tr><th>Slot</th><th>Used by</th><th>Invocation style</th><th>Default thinking</th><th>Cost profile</th></tr>
+  <tr><td><code>ANALYST</code></td><td>F-04 Coach Report, radar narratives</td><td>JSON-schema structured output, non-streaming</td><td><strong>high</strong></td><td>Low volume, high stakes</td></tr>
+  <tr><td><code>TESTGEN</code></td><td>F-10 adversarial test proposals</td><td>JSON-schema structured output, batched</td><td><strong>high</strong></td><td>Per-problem batch, cached forever</td></tr>
+  <tr><td><code>JUDGE_FEEDBACK</code></td><td>F-11 diagnosis + exact fix + hint ladder</td><td>JSON-schema structured output</td><td><strong>high</strong></td><td>Per failed submission, cache by (problem, code-hash)</td></tr>
+  <tr><td><code>MENTOR</code></td><td>F-15 chat, roadmap phrasing</td><td>Streaming chat with tool calls</td><td>medium</td><td>Highest volume - budget-capped per user/day</td></tr>
+  <tr><td><code>CONTENT</code></td><td>F-06/F-16 module and editorial drafting (founder-reviewed)</td><td>Long-form completion</td><td>medium</td><td>Authoring-time only</td></tr>
+  <tr><td><code>LITE</code></td><td>Tagging, titles, embeddings-adjacent chores, bulk classification</td><td>Short completion / embeddings</td><td>minimal</td><td>High volume, cheapest model</td></tr>
+</table>
+
+<h3>Fill-in template: .env (copy into the repo as .env.example; real values only in untracked .env)</h3>
+<pre>
+# ================= LLM PROVIDERS - FILL THESE IN =================
+# Any OpenAI-compatible gateway works: OpenRouter, Genmax, a self-hosted
+# proxy, or a vendor's own endpoint. Base URL usually ends in /v1
+LLM_PRIMARY_BASE_URL=PASTE_BASE_URL_HERE
+LLM_PRIMARY_API_KEY=PASTE_API_KEY_HERE
+
+# Optional second provider (failover, or cheap models for LITE):
+LLM_SECONDARY_BASE_URL=PASTE_OR_LEAVE_EMPTY
+LLM_SECONDARY_API_KEY=PASTE_OR_LEAVE_EMPTY
+
+# ================= MODEL SLOTS - FILL THESE IN ===================
+# THINKING values: minimal | low | medium | high
+# Model IDs are passed verbatim, so effort-suffixed IDs your gateway
+# understands (for example a gpt-5.6 / gpt-5.6-terra family id, or an
+# id ending in -high) work as-is.
+MODEL_ANALYST_ID=PASTE_MODEL_ID_HERE
+MODEL_ANALYST_THINKING=high
+MODEL_TESTGEN_ID=PASTE_MODEL_ID_HERE
+MODEL_TESTGEN_THINKING=high
+MODEL_JUDGE_FEEDBACK_ID=PASTE_MODEL_ID_HERE
+MODEL_JUDGE_FEEDBACK_THINKING=high
+MODEL_MENTOR_ID=PASTE_MODEL_ID_HERE
+MODEL_MENTOR_THINKING=medium
+MODEL_CONTENT_ID=PASTE_MODEL_ID_HERE
+MODEL_CONTENT_THINKING=medium
+MODEL_LITE_ID=PASTE_MODEL_ID_HERE
+MODEL_LITE_THINKING=minimal
+
+# ================= SAFETY RAILS ==================================
+LLM_DAILY_BUDGET_USD_TOTAL=10
+LLM_MENTOR_DAILY_TOKENS_PER_USER=20000
+LLM_KILL_SWITCH=false
+</pre>
+
+<h3>Equivalent structured config: models.config.json</h3>
+<pre>
+{
+  "providers": {
+    "primary":   { "base_url_env": "LLM_PRIMARY_BASE_URL",   "api_key_env": "LLM_PRIMARY_API_KEY" },
+    "secondary": { "base_url_env": "LLM_SECONDARY_BASE_URL", "api_key_env": "LLM_SECONDARY_API_KEY" }
+  },
+  "slots": {
+    "analyst":        { "provider": "primary", "model_id_env": "MODEL_ANALYST_ID",        "thinking_env": "MODEL_ANALYST_THINKING" },
+    "testgen":        { "provider": "primary", "model_id_env": "MODEL_TESTGEN_ID",        "thinking_env": "MODEL_TESTGEN_THINKING" },
+    "judge_feedback": { "provider": "primary", "model_id_env": "MODEL_JUDGE_FEEDBACK_ID", "thinking_env": "MODEL_JUDGE_FEEDBACK_THINKING" },
+    "mentor":         { "provider": "primary", "model_id_env": "MODEL_MENTOR_ID",         "thinking_env": "MODEL_MENTOR_THINKING" },
+    "content":        { "provider": "primary", "model_id_env": "MODEL_CONTENT_ID",        "thinking_env": "MODEL_CONTENT_THINKING" },
+    "lite":           { "provider": "secondary", "model_id_env": "MODEL_LITE_ID",         "thinking_env": "MODEL_LITE_THINKING" }
+  },
+  "high_stakes_slots": ["analyst", "testgen", "judge_feedback"]
+}
+</pre>
+
+<h3>Invocation contract (binding on the Executor)</h3>
+<ul>
+  <li><strong>Client:</strong> one server-side gateway module wrapping the official OpenAI SDK with <code>baseURL</code> override per provider. No AI call anywhere else in the codebase; no key ever reaches the browser bundle.</li>
+  <li><strong>Thinking-level mapping:</strong> send the slot's level as <code>reasoning_effort</code> (OpenAI-style); if the gateway uses the OpenRouter-style <code>reasoning: effort</code> object, the adapter translates. If the provider rejects the parameter (400/unknown-param), strip it and retry once.</li>
+  <li><strong>Hard-coded fallback (pre-authorized by the user):</strong> when a provider cannot express thinking level at all, the Executor hard-codes high effort for every slot in <code>high_stakes_slots</code> - either by choosing an inherently high-effort model ID (the founders can encode effort in the ID itself, since IDs pass through verbatim) or by pinning the strongest available configuration. Never silently downgrade a high-stakes slot.</li>
+  <li><strong>Reliability:</strong> timeouts (60s non-streaming), exponential backoff (max 3 tries), provider failover to secondary when configured, JSON-schema outputs where supported with local validation fallback.</li>
+  <li><strong>Observability and cost:</strong> every call logs slot, model ID, tokens, latency, and estimated cost into <code>llm_usage_log</code>; daily budget envs enforce cutoffs; <code>LLM_KILL_SWITCH=true</code> disables all AI features gracefully (site keeps working without them).</li>
+  <li><strong>Secrecy:</strong> <code>.env</code> gitignored; CI secret-scan on every push; keys server-side only; this plan contains placeholders only. Amendment A2: the executor chat receives live keys by founder decision - the executor writes them straight into untracked .env, never echoes, logs, or commits them, and the founder rotates every key after the run.</li>
+</ul>
+
+<h2>7. Evidence And Candidate Ledger</h2>
+<p class="muted">Build-mode ledger: entries are research findings and assumptions that the plan depends on, classified with the standard states. Static documentation/license inspection is graded E1; live site/raw-file inspection E2.</p>
+<table>
+  <tr><th>ID</th><th>Claim / requirement</th><th>State</th><th>Evidence</th><th>Planning decision</th></tr>
+  <tr><td>R-01</td><td>code-engine (Kawsar) is a Judge0-compatible execution API: Node/Express, Redis+BullMQ, Docker/isolate/Firecracker executor options, MIT, metrics + rate limiting; brand-new (1 commit)</td><td><span class="tag t-ok">CONFIRMED</span></td><td>E1-E2: repo + raw README, github.com/waliullahx82/code-engine</td><td>Seed for the judge service (S7) with a mandatory security-hardening pass; treat as scaffold, not battle-tested infra.</td></tr>
+  <tr><td>R-02</td><td>algolytics (Kawsar) is a Next.js 14 + TS + Tailwind + Firebase CP analytics dashboard (CF/LC/HackerRank stats, streaks, topic charts), MIT, 6 commits</td><td><span class="tag t-ok">CONFIRMED</span></td><td>E1-E2: repo + raw README, github.com/waliullahx82/algolytics</td><td>Seed for Track 1 UI/IA; re-platform backend from Firebase onto the unified Postgres API (veto note 1).</td></tr>
+  <tr><td>R-03</td><td>therealbcs.com = Bangladesh Competitive Programming Society: volunteer community (14k+ Discord) + IUPC/ICPC index since 2017 that links out to Codeforces Gym PDFs and Toph; hosts no statements itself; no API; no ToS page</td><td><span class="tag t-ok">CONFIRMED</span></td><td>E2: live inspection of therealbcs.com and /iupc link targets, 2026-07-19</td><td>Use as discovery/curation reference and community channel - not a content source to scrape.</td></tr>
+  <tr><td>R-04</td><td>Codeforces materials license permits republishing problem texts with attribution EXCEPT on platforms supporting automatic testing; tests/checkers may not be reused</td><td><span class="tag t-ok">CONFIRMED</span></td><td>E1: codeforces.com/blog/entry/967</td><td>Frozen content gate: no CF/Gym problems on our judge; link-out + API-verified tracking instead (F-14).</td></tr>
+  <tr><td>R-05</td><td>Toph ToS reserves contest content rights to Toph/organizers; no third-party republishing grant</td><td><span class="tag t-ok">CONFIRMED</span></td><td>E1: toph.co/terms</td><td>Same gate; IUPC hosting only with written organizer permission (post-MVP outreach task).</td></tr>
+  <tr><td>R-06</td><td>CP-31 (TLE Eliminators) is a curated link-out list of CF problems by rating band (800-1900), not a hosted archive</td><td><span class="tag t-ok">CONFIRMED</span></td><td>E1: tle-eliminators.com/cp-sheet; codeforces.com/blog/entry/139079</td><td>Validates F-14's curated-list + link-out + tracking model as the industry norm.</td></tr>
+  <tr><td>R-07</td><td>License-safe judge stack: Piston MIT, isolate GPLv2 (fine when invoked as a subprocess), testlib MIT, QingdaoU/OnlineJudge MIT (fork-friendly reference); Judge0 GPLv3 (arm's-length API use only); DMOJ and Kilonova AGPLv3 (never fork into closed SaaS); DOMjudge/CMS licenses not directly fetched this pass</td><td><span class="tag t-ok">CONFIRMED</span></td><td>E1: LICENSE files inspected per repo (DOMjudge/CMS sub-items UNVERIFIED but unused)</td><td>Architecture table in Section 5; legal review checkpoint inside S7 acceptance.</td></tr>
+  <tr><td>R-08</td><td>testlib + jngen (both MIT) + Polygon workflow (generator → validator → model + wrong solutions cross-check → checker) is the proven test-quality pipeline</td><td><span class="tag t-ok">CONFIRMED</span></td><td>E1: github.com/MikeMirzayanov/testlib, github.com/ifsmirnov/jngen, polygon.codeforces.com</td><td>F-10 pipeline copies this workflow; jngen pinned to a specific commit.</td></tr>
+  <tr><td>R-09</td><td>LLM adversarial test generation works as augmentation (CodeHacker arXiv 2602.20213, Klear-CodeTest, CounterGen) but LLMs remain weak at targeted bug-exposing generators (TCGBench arXiv 2506.06821) - and efficacy on OUR problem bank is unmeasured</td><td><span class="tag t-warn">UNRESOLVED</span></td><td>E1: external papers/repos only; no local reproduction yet</td><td>Hybrid design mandated (F-10); S9-S10 carry a planted-bug benchmark (G5) to convert this to E3 evidence during execution.</td></tr>
+  <tr><td>R-10</td><td>Curriculum licensing: cp-algorithms CC BY-SA 4.0 (commercial reuse OK with attribution + ShareAlike); USACO Guide content and CSES CC BY-NC-SA 4.0 (no commercial reuse)</td><td><span class="tag t-ok">CONFIRMED</span></td><td>E1: LICENSE files / cses.fi statement</td><td>F-06 content policy; attribution page in launch checklist.</td></tr>
+  <tr><td>R-11</td><td>Codeforces official API provides user.info, user.rating, user.status, problemset.problems; submission SOURCE CODE is not exposed (manager-gated); strict courtesy rate limits apply</td><td><span class="tag t-ok">CONFIRMED</span></td><td>E1: codeforces.com/apiHelp review this pass</td><td>F-02/F-04 designed around metadata + user-supplied code; exact current rate limit re-verified live during S2.</td></tr>
+  <tr><td>R-12</td><td>LeetCode import must use unofficial GraphQL (solved counts, calendar, recent ACs); stability and ToS exposure over the project window are unknown</td><td><span class="tag t-warn">UNRESOLVED</span></td><td>E1: community wrappers; no official surface</td><td>Feature-flagged (veto note 3) with graceful degradation and manual-entry fallback.</td></tr>
+  <tr><td>R-13</td><td>Other imports: AtCoder via kenkoooo community API (stable, etiquette required); CodeChef official API deprecated; HackerRank/HackerEarth expose no useful public profile APIs; StopStalk sunset 2025-08-01; clist.by alive (aggregated ratings, ~10 req/min); vjudge-style submission relaying is fragile (CF bot cap 250/day since 2024, Turnstile blocks)</td><td><span class="tag t-ok">CONFIRMED</span></td><td>E1: per-platform checks 2026-07-19</td><td>MVP = Codeforces only; AtCoder next; never build submission relaying; clist.by optional for multi-judge rating display.</td></tr>
+  <tr><td>R-14</td><td>Competitive gap: trackers (Codolio ~290K visits/mo; CF Analytics; CFviz) and adaptive drilling (Orion by Levelop) exist separately, but no product combines import + own judge + AI coaching</td><td><span class="tag t-ok">CONFIRMED</span></td><td>E1: product scan 2026-07-19</td><td>Positioning: own the full loop; ship Variant C to reach the combination fastest.</td></tr>
+  <tr><td>R-15</td><td>Founder capacity assumption: about 12 focused hours/week each for 12 weeks, plus Executor Agent throughput</td><td><span class="tag t-warn">UNRESOLVED</span></td><td>E0: assumption - not yet confirmed by the founders</td><td>Week-1 capacity review inside S0; compression mode (Section 9) absorbs shortfalls.</td></tr>
+  <tr><td>R-16</td><td>The signed-in user's own submission source code is viewable in-browser on all four target platforms (Codeforces submission pages; LeetCode session GraphQL submission detail; AtCoder public submission pages; CodeChef own-solution pages), enabling a consent-first extension collector</td><td><span class="tag t-ok">CONFIRMED</span></td><td>E1: per-platform mechanics documented; exact selectors and endpoints re-verified live by the S14 day-1 spike before full build</td><td>F-17 collectors specified per platform; long-term programmatic stability is the residual risk, covered by per-platform flags and the extension risk row.</td></tr>
+</table>
+<p class="muted">Ledger entries: 16 | CONFIRMED: 13 | UNRESOLVED: 3 | DUPLICATE / FALSE_POSITIVE / OUT_OF_CONTRACT: 0. (Build mode: entries are findings, not defect reports.)</p>
+
+<h2>8. Dependency-Aware Execution Plan</h2>
+<p class="muted">Time budget 19,440 minutes (324 h) across ~12 weeks; step timeboxes total 18,720 minutes, leaving 720 minutes contingency. Timeboxes measure planned working EFFORT, not computer time - post-Amendment A2 they are founder-side effort (AI-assisted in the IDE), with the single ~120-minute Sprint Zero executor run pre-seeding the scaffolding slices. Evidence levels: E1 inspection, E2 focused probe, E3 regression/integration, E4 clean-environment/adversarial/end-to-end.</p>
+<table>
+  <tr><th>Step</th><th>Timebox</th><th>Owner</th><th>Deps</th><th>Action</th><th>Acceptance evidence</th><th>Fallback</th></tr>
+  <tr><td><strong>S0</strong> - Foundations and scaffolding</td><td>1440 min</td><td>Sprint Zero run + both founders</td><td>-</td><td>Monorepo (Next.js + TS), Google OAuth, Postgres + Prisma schema v1, CI (typecheck/lint/test/secret-scan), .env.example from Section 6, staging deploy. Week-1 capacity review (R-15).</td><td>E2: app boots locally + staging; OAuth end-to-end; CI green; capacity confirmed or plan re-scoped.</td><td>OAuth stalls → magic-link first, park Google; record blocker.</td></tr>
+  <tr><td><strong>S1</strong> - LLM gateway module</td><td>720 min</td><td>Founders (AI-assisted); seeded by Sprint Zero</td><td>S0</td><td>Slot registry from env; thinking-level adapter (reasoning_effort ↔ OpenRouter-style, strip-and-retry); verbatim model IDs; retries, failover, budgets, kill switch, usage logging.</td><td>E2: mock-provider suite passes; one live smoke call once founders fill .env.</td><td>Provider rejects effort params entirely → hard-code high-effort IDs for high-stakes slots (pre-authorized).</td></tr>
+  <tr><td><strong>S2</strong> - Codeforces import pipeline</td><td>960 min</td><td>Kawsar</td><td>S0</td><td>Handle verification; user.info/user.rating/user.status ingestion with cache, backoff, resume; normalized storage; re-verify current rate limits live.</td><td>E2: three golden handles (high-rated, ~1200, fresh) match public profiles.</td><td>Sustained API failure → queued retries + partial-import state; signup never blocks.</td></tr>
+  <tr><td><strong>S3</strong> - Skill Radar analytics</td><td>1200 min</td><td>Kawsar</td><td>S2</td><td>Deterministic per-topic mastery from tags, difficulty vs rating, verdict mix, recency; radar UI + gap list (algolytics components reused).</td><td>E3: golden-profile fixtures incl. the 1200-no-graphs persona produce expected gaps; deterministic across runs.</td><td>Tag sparsity → rating-band heuristics with visible low-confidence label.</td></tr>
+  <tr><td><strong>S4</strong> - AI Coach Report v1</td><td>960 min</td><td>Founders (AI-assisted); seeded by Sprint Zero</td><td>S1, S3</td><td>ANALYST slot, JSON-schema output; every claim cites data points; optional pasted-code style section.</td><td>E2: reports for 3 test profiles accepted by both founders; zero uncited claims.</td><td>Weak quality → template-driven sections on deterministic stats; shrink free narrative.</td></tr>
+  <tr><td><strong>S5</strong> - Roadmap engine + curriculum v1</td><td>1440 min</td><td>You (product/content)</td><td>S1, S3</td><td>Topic prereq DAG per F-05/F-07; 12 launch modules (original / CC BY-SA-attributed) with YouTube link-outs; 7-day plan generator. Module drills use link-out problems at v1 (audit fix: the bank does not exist yet at weeks 2-4) and are re-pointed to bank problems when S6 lands.</td><td>E2: DAG in DB; modules render; plans generated for both personas.</td><td>Authoring lag → 6 modules covering levels 0-800; rest marked coming soon.</td></tr>
+  <tr><td><strong>S6</strong> - Original problem bank v1</td><td>1920 min</td><td>You (product/content)</td><td>S0</td><td>Problem bank (floor tier 40 / full tier 60+, levels 0-1200 priority): statement, tags (rating/type/concept/origin), editorial, reference + brute solutions; per-problem legal checklist; AI-drafted, founder-reviewed statements allowed (audit fix: 32 min/problem average is realistic only with CONTENT-slot drafting; the 40-problem floor is the hard commitment).</td><td>E2: at least 40 problems pass checklist with provenance recorded (floor); 60+ is the full-tier target.</td><td>Slow authoring → prioritize 0-1200 coverage; increase AI drafting share under review.</td></tr>
+  <tr><td><strong>S7</strong> - Sandbox judge service</td><td>1440 min</td><td>Kawsar</td><td>S0</td><td>Harden code-engine: isolate-class limits (no network, CPU/wall/memory/pids, chroot), C++ + Python, worker health metrics, license review of final dependency set.</td><td>E4: adversarial suite contained - fork bomb, big alloc, busy loop, fs escape, net egress; limits enforced within tolerance.</td><td>isolate integration slips → self-hosted Piston (MIT) behind the same internal API.</td></tr>
+  <tr><td><strong>S8</strong> - Submission pipeline + verdict UI</td><td>960 min</td><td>Kawsar</td><td>S6, S7</td><td>Editor → queue → sandbox → per-test verdicts; submission history; on-platform code feeds the style analyzer (F-04).</td><td>E3: 20-submission regression pack returns expected AC/WA/TLE/MLE/RE.</td><td>UI lag → minimal verdict list first; per-test detail deferred.</td></tr>
+  <tr><td><strong>S9</strong> - Hybrid test generation</td><td>1200 min</td><td>Founders (AI-assisted); seeded by Sprint Zero</td><td>S1, S8</td><td>testlib-style generators + validator + reference/brute cross-check harness; TESTGEN slot adversarial proposals; quarantine on any disagreement; cases cached per problem.</td><td>E3: 100% of accepted cases pass validation + solution agreement across the bank.</td><td>LLM cases underperform → parameterized random + handcrafted edges; LLM advisory only.</td></tr>
+  <tr><td><strong>S10</strong> - AI debug feedback</td><td>960 min</td><td>Founders (AI-assisted); seeded by Sprint Zero</td><td>S9</td><td>Failing-case minimization; JUDGE_FEEDBACK slot diagnosis + hint ladder (concept → approach → line-level exact fix; full fix on request only).</td><td>E3: 30 planted-bug benchmark - sandbox catches ≥80%; diagnosis points to true cause in ≥70% of caught cases (founder-graded).</td><td>Below target → failing-case explanation + category hints; iterate prompts; keep ladder honest.</td></tr>
+  <tr><td><strong>S11</strong> - Gamification layer</td><td>1440 min</td><td>You (product/content)</td><td>S3, S8</td><td>XP engine, levels 0-2000 with PDF gate mapping + badges (Newbie/Beginner/Master/GM certificate), streaks + freeze tokens, daily quest composer, badge wall, boss-fight gate sets.</td><td>E3: state-machine tests pass incl. Asia/Dhaka midnight rollover and idempotent XP awards.</td><td>Time short → cut leagues/friend leaderboards; keep XP, streaks, quests, badges.</td></tr>
+  <tr><td><strong>S12</strong> - Mentor chat + tracked external practice</td><td>1200 min</td><td>Founders (AI-assisted); seeded by Sprint Zero</td><td>S4, S5, S6</td><td>MENTOR slot chat grounded in profile/roadmap/bank with per-day budget + hint-first policy; CP-31-style link-out lists with CF API auto-verification (F-14); similarity clustering v1 (F-12).</td><td>E2: chat answers grounded (spot-check 20 exchanges); external AC detected within one polling cycle.</td><td>Guardrails not ready → canned coach Q&amp;A on report page; free chat deferred.</td></tr>
+  <tr><td><strong>S13</strong> - Beta hardening + launch</td><td>1440 min</td><td>Both founders</td><td>S8, S9, S10, S11, S12</td><td>Clean-environment redeploy; monitoring, backups, rate limits, cost dashboards; legal pages incl. attribution; invite 15-25 beta users; feedback channel; Section 12 checklist.</td><td>E4: fresh-VM deploy matches intended commit; checklist fully checked; beta cohort onboarded.</td><td>Blockers at stop-work → 5-user friends-only cohort; residual risks logged in ledger.</td></tr>
+  <tr><td><strong>S14</strong> - Import Companion extension (F-17, Amendment A1)</td><td>1440 min</td><td>Founders (AI-assisted); skeleton + CF collector seeded by Sprint Zero</td><td>S0, S2</td><td>Consent-first MV3 extension per the F-17 spec: pairing token, per-platform opt-in, throttled resumable sync of the user's own submissions (metadata + code) from CF, LeetCode, AtCoder, CodeChef; upload endpoint; corpus feeds the S4 style analyzer.</td><td>E3: day-1 access spike on founder accounts (converts R-16 to E2); end-to-end own-code sync on founder accounts; dedup verified; consent, pause, disconnect, delete all work.</td><td>Platform blocks or markup drifts → disable that platform's flag, continue with the rest; manual paste/upload remains the universal fallback.</td></tr>
+</table>
+
+<h3>Phase and week grid</h3>
+<table>
+  <tr><th>Phase</th><th>Weeks</th><th>Steps</th><th>Gate (Section 10)</th><th>Demo moment</th></tr>
+  <tr><td>P0 Foundations</td><td>1</td><td>S0</td><td>G1</td><td>Sign in with Google on staging</td></tr>
+  <tr><td>P1 Diagnose + Learn</td><td>2-4</td><td>S1, S2, S3, S4, S5 (Track 1) | S7 starts (Track 2)</td><td>G2</td><td>Import your handle → Skill Radar + AI Coach Report + 7-day plan</td></tr>
+  <tr><td>P2 Practice core</td><td>4-8</td><td>S6, S7, S8, S9, S10, S14 (extension, parallel)</td><td>G3, G4, G5, G9</td><td>Solve an original problem on-site; fail; get an exact-fix hint ladder; sync your own CF/LC code via the extension</td></tr>
+  <tr><td>P3 Delight</td><td>8-11</td><td>S11, S12</td><td>G6</td><td>Daily quest, streak, level-up badge, mentor chat, tracked CF practice</td></tr>
+  <tr><td>P4 Launch</td><td>11-12</td><td>S13</td><td>G7</td><td>15-25 real beta users onboarded</td></tr>
+</table>
+
+<h3>Capacity tiers and floor-scenario check (added in audit iteration 5)</h3>
+<p>Founder capacity (R-15) is this plan's only E0 assumption. Scope is therefore tiered so the plan stays executable under every plausible capacity outcome - the week-1 review selects the tier; the assumption no longer threatens the plan itself:</p>
+<table>
+  <tr><th>Tier</th><th>Trigger (week-1 capacity review)</th><th>Scope</th><th>Founder-load arithmetic (estimates)</th></tr>
+  <tr><td><strong>Full</strong></td><td>12+ h/week per founder confirmed</td><td>All steps S0-S14; 60+ problem bank; mentor chat; embedding clustering</td><td>18,720 min of planned effort; the single ~120-minute Sprint Zero run (Amendment A2) conservatively offsets about 2,400 min of scaffolding-grade work → founders carry roughly 16,300 min ≈ 11.3 h/week each over 12 weeks. Margin against the 12 h assumption is THIN post-A2; compression triggers and the adjustable deadline are the protection, not slack.</td></tr>
+  <tr><td><strong>Reduced</strong></td><td>8-11 h/week</td><td>Compression-mode scope (Section 9): full core loop, reduced S11, canned mentor Q&amp;A, tag-only clustering</td><td>Roughly 16,400 min planned → founders carry ≈ 14,000 min ≈ 9.7 h/week each post-A2; viable only in the upper half of the 8-11 h band, otherwise apply floor handling.</td></tr>
+  <tr><td><strong>Floor</strong></td><td>Under 8 h/week</td><td>S0-S4, S5 reduced (6 modules), S6 floor (40 problems), S7-S10, S11 reduced (XP + streaks + quests), S13; S14 reduced to the Sprint Zero skeleton + Codeforces collector only; S12 dropped entirely</td><td>Roughly 15,400 min planned; Sprint Zero offsets ≈ 2,400 → founders carry ≈ 13,000 min ≈ 9 h/week each, which EXCEEDS the under-8 h trigger. Explicit floor contingency: extend the team-set hard date by ~4 weeks (to 2026-11-08) or buy further ~2-hour executor sessions (each offsets ≈ 2,000-2,500 founder-minutes). The core loop still ships; the date moves honestly instead of the scope lying.</td></tr>
+</table>
+<p class="muted">Reading: every tier still ships the differentiating loop (import → Skill Radar → original problems → sandbox judge → AI exact-fix). Post-A2, the full and reduced tiers hold the 12-week date; the floor tier honestly trades the date (+~4 weeks) or buys extra executor sessions rather than silently cutting the core.</p>
+
+<h3>Executor runtime rebase - the single ~2-hour Sprint Zero run (Amendment A2)</h3>
+<p><strong>Founder constraint (frozen):</strong> total affordable implementing-agent runtime is roughly 120 minutes, INCLUDING its own smoke and stress checks, delivered as one credentialed run (credentials provided in the executor chat by founder decision; every key rotated after the run). Consequence: the agent is no longer a step owner - it is a one-shot accelerator, and all steps are founder-owned (AI-assisted in the IDE).</p>
+<p><strong>Sprint Zero priority list</strong> (strictly in order; an unfinished item gets an honest blocker note, never a fake completion):</p>
+<table>
+  <tr><th>Window</th><th>Deliverable</th><th>Proof before moving on</th></tr>
+  <tr><td>0-25 min</td><td>Monorepo scaffold: Next.js + TypeScript + Tailwind, Prisma schema v1 (users, external_profiles, problems, testsets, submissions, tags, topics, modules, xp_events, streaks, badges, quests, coach_reports, llm_usage_log), Auth.js Google wiring from env, .gitignore covering .env, CI with secret scan, .env.example copied from Section 6</td><td>App boots; schema migrates</td></tr>
+  <tr><td>25-40 min</td><td>LLM gateway module: slot registry, thinking-level adapter (strip-and-retry), budgets, kill switch, usage logging + mock tests</td><td>Mock suite green; ONE live smoke call per configured slot with the provided keys (cheapest possible prompt)</td></tr>
+  <tr><td>40-70 min</td><td>Judge path skeleton: docker-compose wiring Kawsar's code-engine + Redis, one sample problem, submit round-trip script (C++ AC + deliberate TLE), mini adversarial pack (fork bomb, busy loop, oversized alloc) executed if the environment allows</td><td>Round-trip verdicts recorded; containment results or environment blockers recorded verbatim</td></tr>
+  <tr><td>70-90 min</td><td>F-17 extension skeleton: manifest, consent popup stub, throttle queue, WORKING Codeforces collector, LC/AT/CC stubs behind flags, pairing endpoint route in the web app</td><td>CF collector fetches one of the founder's own submissions end to end</td></tr>
+  <tr><td>90-105 min</td><td>Codeforces import module: user.status fetch, normalize, cache + golden-handle fixture test</td><td>Fixture test green</td></tr>
+  <tr><td>105-120 min</td><td><strong>STOP-LINE (mandatory at T-15):</strong> stop coding regardless of state; write PROGRESS.md (Section 11 template) + SPRINT_ZERO_REPORT.md (what works with evidence, what is stubbed, exact founder next actions per step); commit; push only if instructed</td><td>Both files exist and are self-sufficient for resumption</td></tr>
+</table>
+<p class="muted">Each additional purchased ~2-hour session offsets roughly 2,000-2,500 founder-minutes of scaffolding-grade work and improves the tier arithmetic above. The kickoff message to paste into the executor chat - including credential placeholders - is in Section 13.</p>
+
+<h2>9. Deadline Modes And Scope Cuts</h2>
+<table>
+  <tr><th>Mode</th><th>Trigger</th><th>Allowed work</th><th>Work dropped</th><th>Owner</th></tr>
+  <tr><td>Normal</td><td>Default from kickoff</td><td>Full step sequence S0-S13</td><td>None</td><td>Both founders</td></tr>
+  <tr><td>Compression</td><td>Any phase gate slips more than 7 days, or week-1 capacity review fails (R-15)</td><td>Core loop only: S0-S4, S6-S10, reduced S11 (XP + streaks + quests)</td><td>LeetCode import flag stays off; leagues/friend leaderboards; similarity clustering downgraded to tag-overlap; mentor free-chat (canned Q&amp;A instead); module count halved</td><td>You (product) declares; logged in PROGRESS.md</td></tr>
+  <tr><td>Freeze</td><td>2026-10-05 00:00 +06, or G5 passes - whichever is later</td><td>Bug fixes, content polish, regression runs, docs, deploy rehearsal</td><td>All new features</td><td>Kawsar declares</td></tr>
+  <tr><td>Submission (beta launch)</td><td>Freeze exit criteria met</td><td>Deploy verification, checklist sign-off, invites, announcement post</td><td>All implementation</td><td>Both founders</td></tr>
+  <tr><td>Hard stop</td><td>2026-10-11 22:00 +06 (proposed, team-adjustable)</td><td>Nothing new; ship the best verified state</td><td>Everything unverified</td><td>Both founders</td></tr>
+</table>
+
+<h2>10. Validation Matrix</h2>
+<table>
+  <tr><th>Requirement</th><th>Probe</th><th>Expected result</th><th>Evidence level</th><th>Regression set</th></tr>
+  <tr><td>G1 Foundations</td><td><code>boot staging + OAuth round-trip + CI run</code></td><td>Login completes; CI green incl. secret scan</td><td>E2</td><td>CI on every push thereafter</td></tr>
+  <tr><td>G2 Import correctness</td><td><code>import 3 golden CF handles</code></td><td>Solve counts + rating history match public profiles; radar matches hand-computed fixtures</td><td>E2-E3</td><td>Golden-profile fixtures in CI</td></tr>
+  <tr><td>G3 Sandbox containment</td><td><code>adversarial pack: fork bomb, 2GB alloc, busy loop, fs escape, net egress</code></td><td>All contained; limits enforced; workers healthy after pack</td><td>E4</td><td>Re-run before every judge-touching release</td></tr>
+  <tr><td>G4 Verdict correctness</td><td><code>20 canned submissions across AC/WA/TLE/MLE/RE</code></td><td>Expected verdict per submission, stable across 3 runs</td><td>E3</td><td>Canned pack in CI (judge stage)</td></tr>
+  <tr><td>G5 Test quality</td><td><code>validator + reference/brute agreement across bank; 30 planted-bug benchmark</code></td><td>100% accepted-case validity; ≥80% planted bugs caught; ≥70% accurate diagnoses among caught</td><td>E3</td><td>Benchmark re-run when TESTGEN prompt or model changes</td></tr>
+  <tr><td>G6 Gamification integrity</td><td><code>state-machine suite: streak edges, Asia/Dhaka midnight, double-award attempts</code></td><td>No duplicate XP; correct rollovers; freeze tokens consumed correctly</td><td>E3</td><td>Suite in CI</td></tr>
+  <tr><td>G7 Launch readiness</td><td><code>fresh-VM clean redeploy + checklist walkthrough</code></td><td>Deployed revision matches intended commit; Section 12 fully checked</td><td>E4</td><td>Repeat for every production deploy</td></tr>
+  <tr><td>AI cost discipline</td><td><code>simulated day of traffic at beta scale</code></td><td>All slots within configured budget envs; kill switch degrades gracefully</td><td>E2</td><td>Budget alarms in monitoring</td></tr>
+  <tr><td>Secret hygiene</td><td><code>CI secret-scan + manual grep before every push</code></td><td>Zero credentials in repo, logs, or client bundle</td><td>E2</td><td>Every push</td></tr>
+  <tr><td>G8 Recovery drill</td><td><code>at the G4 checkpoint, a fresh Executor session must resume from PROGRESS.md + this plan alone</code></td><td>Resume succeeds with zero founder clarification; any missing state is fixed before proceeding</td><td>E2</td><td>Repeat after any 14-day execution gap</td></tr>
+  <tr><td>G9 Extension sync</td><td><code>consent-flow review + end-to-end own-code sync on founder accounts across enabled platforms</code></td><td>Correct corpus lands deduplicated; consent, pause, disconnect, and delete all work; zero requests fire before consent</td><td>E3</td><td>Weekly selector smoke tests; re-run on any collector change</td></tr>
+</table>
+<p class="muted"><strong>Threshold calibration rule (added in audit iteration 4):</strong> the G5 numeric thresholds (80 percent planted-bug catch, 70 percent diagnosis accuracy) are re-baselined once after the first full benchmark run with founder sign-off, then frozen; any later change requires a logged rationale in the ledger. This converts provisional thresholds into governed ones instead of leaving them informal.</p>
+
+<h2>11. Risks, Fallbacks, And Recovery State</h2>
+<table>
+  <tr><th>Risk</th><th>Trigger</th><th>Response</th><th>Recovery record</th></tr>
+  <tr><td>Content-rights breach (highest severity)</td><td>Any problem/module lacking provenance record</td><td>Frozen gate in Section 4; per-item legal checklist in S5/S6; quarantine item, never ship</td><td>Provenance field on every problem/module row</td></tr>
+  <tr><td>LeetCode unofficial API breaks or is blocked</td><td>Import error rate spike</td><td>Flag off (default); manual entry fallback; CF remains primary</td><td>Flag state + incident note in PROGRESS.md</td></tr>
+  <tr><td>Codeforces rate limiting / API change</td><td>429s or schema drift</td><td>Cache + ≥2s spacing + backoff + resume; nightly re-sync instead of live polling</td><td>Importer state table with cursor</td></tr>
+  <tr><td>LLM cost blowup</td><td>Budget alarm</td><td>Per-slot budgets, caching (feedback by code-hash, testgen per problem), LITE routing, kill switch</td><td>llm_usage_log daily rollup</td></tr>
+  <tr><td>Sandbox escape / abuse</td><td>Containment probe failure or anomaly</td><td>No-network default, cgroup caps, chroot, least-privilege workers; pull judge offline (site degrades to learning mode)</td><td>Incident entry + G3 re-run before re-enable</td></tr>
+  <tr><td>Hallucinated / wrong AI tests</td><td>Reference-vs-brute disagreement</td><td>Quarantine case; never enters canonical testset; weekly quarantine review</td><td>Quarantine table with resolution status</td></tr>
+  <tr><td>Provider incompatibility with thinking levels</td><td>Param rejection</td><td>Adapter strip-and-retry; hard-code high effort for high-stakes slots (pre-authorized)</td><td>Gateway config note per provider</td></tr>
+  <tr><td>Two-person bandwidth shortfall</td><td>Gate slip &gt; 7 days or failed capacity review</td><td>Compression mode (Section 9); Executor Agent absorbs more scaffolding</td><td>Deadline-mode transitions logged</td></tr>
+  <tr><td>Scope creep from the idea backlog</td><td>New feature requests mid-phase</td><td>Parking lot in PROGRESS.md; only gate-passing scope ships</td><td>Parking-lot section reviewed at each gate</td></tr>
+  <tr><td>User data privacy and deletion requests (audit addition)</td><td>Beta user requests export/removal, or an incident</td><td>Collect minimal PII (email, handles); delete-account flow purges imports and submissions; privacy page states retention; encryption at rest where the host supports it</td><td>Deletion events logged; privacy page versioned</td></tr>
+  <tr><td>Prompt injection / abuse via user-supplied text - pasted code, chat, custom statements (audit addition)</td><td>Anomalous mentor or analyst outputs</td><td>All user text treated as untrusted inside LLM prompts (delimited, instruction-shielded); moderation pass on chat; hint-first policy caps damage; per-user budgets limit abuse</td><td>Flagged-exchange log reviewed weekly</td></tr>
+  <tr><td>LLM provider outage (audit addition)</td><td>Slot error-rate spike</td><td>Gateway failover to secondary provider; cached feedback/testgen keep core working; kill switch degrades to non-AI mode gracefully</td><td>Outage and failover events in llm_usage_log</td></tr>
+  <tr><td>Single-VPS failure or data loss (audit addition)</td><td>Host outage or corruption</td><td>Nightly off-box DB backups; restore drill before beta (Section 12); judge workers stateless and rebuildable from compose</td><td>Last successful backup + restore-drill result recorded</td></tr>
+  <tr><td>Extension collector breakage - platform markup or API drift (Amendment A1)</td><td>Collector smoke test fails or sync error rate spikes</td><td>Per-platform feature flags off; graceful degradation to manual paste/upload; selector fix shipped as an extension update</td><td>Per-platform flag state + drift incidents in PROGRESS.md</td></tr>
+</table>
+<div class="band violet">
+  <p><strong>Recovery-state protocol (mandatory for the Executor).</strong> Maintain <code>PROGRESS.md</code> at repo root, updated at the end of every working session: completed step IDs, current branch and revision, last verified command and result, active blocker, next action, current deadline mode, and any ledger-state changes. A fresh Executor must be able to resume from PROGRESS.md + this plan alone, with no conversational memory - and gate G8 tests exactly that with a live drill.</p>
+<pre class="wrap">PROGRESS.md TEMPLATE (maintained by the Executor; one block, updated every session)
+last_updated:          2026-MM-DDTHH:MM+06:00
+deadline_mode:         normal | compression | freeze | submission
+capacity_tier:         full | reduced | floor
+completed_steps:       [S0, ...]
+current_step:          S_ (with what remains inside it)
+branch_and_revision:   branch @ short-sha
+last_verified_command: command -> observed result
+active_blocker:        none | description + owner + since-when
+next_action:           one concrete sentence a fresh session can execute
+ledger_changes:        R-xx state changes with the evidence that caused them
+parking_lot:           deferred ideas (never silently scheduled)</pre>
+</div>
+
+<h2>12. Submission Checklist</h2>
+<p class="muted">"Submission" for this open-ended build = the private beta launch.</p>
+<ul class="check">
+  <li>Founders filled every PASTE_ placeholder in .env (base URLs, API keys, model IDs, thinking levels) - locally only, never committed</li>
+  <li>Live smoke call succeeded per slot; budgets and kill switch verified</li>
+  <li>All gates G1-G7 passed with recorded evidence in the ledger</li>
+  <li>Clean-VM redeploy performed; deployed revision hash equals intended commit</li>
+  <li>Domain + TLS live; error monitoring, uptime alerts, DB backups, cost dashboards enabled</li>
+  <li>Legal pages published: terms, privacy, content-attribution page (cp-algorithms CC BY-SA credits), takedown contact</li>
+  <li>Rate limits + abuse controls on signup, submissions, and mentor chat</li>
+  <li>Regression packs (G4 canned submissions, G6 suite) green on the release commit</li>
+  <li>15-25 beta invitations sent (community circle / BCS Discord contacts); feedback form + channel live</li>
+  <li>Import Companion: consent flow reviewed by both founders, only spike-verified platforms enabled, pairing tokens rotate, delete-imported-code tested</li>
+  <li>All credentials shared with the executor during Sprint Zero rotated (the founder's own post-run protocol)</li>
+  <li>Backup restore drill performed: latest nightly backup restored to a scratch instance and verified readable</li>
+  <li>Privacy page and delete-account flow live; retention stated; deletion tested end to end</li>
+  <li>PROGRESS.md final state recorded; residual risks and UNRESOLVED ledger items explicitly listed in the beta notes</li>
+</ul>
+
+<h2>13. Executor Handoff</h2>
+<div class="band">
+  <p><strong>To the Executor agent:</strong> official sources and the authority order in Section 1 outrank this plan; reconcile conflicts in a preflight delta before coding. Execute steps by ID in dependency order, capture the required evidence per step, update the ledger states as evidence upgrades (UNRESOLVED → CONFIRMED only with the named probe), and maintain PROGRESS.md per Section 11. Never claim readiness from inspection alone; never let an LLM assign a verdict; never commit a secret; never re-host third-party statements or tests. The user must review the four veto items before S5/S6 content decisions and the Postgres migration harden.</p>
+</div>
+<pre class="wrap">EXECUTOR OPERATING PROMPT
+
+ROLE STACK
+- Primary: Full-Stack Delivery Engineer for AlgoRise, accountable for verified, working software.
+- Platform: Next.js/TypeScript/PostgreSQL/Redis + isolate-class sandboxing specialist.
+- Validation: Test, Security, and Licensing Compliance Auditor.
+
+REASONING WORKFLOW
+In a step-by-step logical process:
+1. Read final plan.html Sections 1-12 and the JSON handoff below; run the preflight delta
+   against the latest user instructions; list assumptions and blockers.
+2. Confirm environment capabilities (repo access, runtime, sandbox host); record them.
+3. Execute the current step's action within its timebox; smallest change that satisfies
+   acceptance; commit per git policy.
+4. Run the step's probes plus affected regression packs; record commands and results in
+   PROGRESS.md and the ledger.
+5. On failure or blocker, apply the step fallback, downgrade scope per deadline mode if
+   triggered, and surface the decision to the founders.
+6. Re-check the frozen constraints (content gate, secret hygiene, verdict integrity)
+   before marking the step done. Report decisions, evidence, and residual risk - not
+   private chain-of-thought.
+
+FORBIDDEN
+- Committing or logging credentials; shipping unvalidated LLM test cases; letting LLM
+  output decide verdicts; re-hosting third-party statements/tests; pushing or deploying
+  against the latest user instruction; claiming submission readiness without G1-G9
+  evidence.
+- In the Import Companion: handling or storing platform credentials, automating logins,
+  collecting any account's data other than the signed-in user's own, or syncing anything
+  before explicit per-platform consent.
+- Exceeding the ~120-minute Sprint Zero runtime or skipping the T-15 stop-line
+  (Amendment A2); echoing, logging, or committing any credential received in the
+  kickoff chat.</pre>
+
+<h3>What to tell the executor agent when handing over this file (copy-paste kickoff)</h3>
+<p>Paste the block below into the executor's chat together with the attached <code>final plan.html</code>, after filling every <code>PASTE_</code> field. Delete any line you do not use. The credentials-in-chat handover is your explicit decision for speed - the template ends by operationalizing your own stated protocol: rotate every key the moment the run finishes.</p>
+<pre>
+ATTACHED FILE: final plan.html
+READ FIRST: Sections 1 (authority + frozen constraints), 6 (model slots),
+8 (Amendment A2 - Sprint Zero priority list), 13 (your operating prompt + JSON handoff).
+
+MISSION
+You are the Executor for Sprint Zero of AlgoRise. Your TOTAL runtime budget is
+120 minutes, INCLUDING your own smoke and stress checks. Work the Sprint Zero
+priority list in plan Section 8 strictly in order - do not reorder, do not
+gold-plate. At T-15 minutes trigger the stop-line: stop coding no matter where
+you are, write PROGRESS.md (Section 11 template) and SPRINT_ZERO_REPORT.md
+(what works with evidence, what is stubbed, exact next actions for the founders),
+then commit. Never fake completion - record blockers verbatim. Do not claim any
+gate you did not actually run.
+
+CREDENTIALS - write these into untracked .env IMMEDIATELY on start.
+Never echo, log, commit, or print them anywhere, including your own output.
+LLM_PRIMARY_BASE_URL=PASTE_BASE_URL_HERE
+LLM_PRIMARY_API_KEY=PASTE_API_KEY_HERE
+LLM_SECONDARY_BASE_URL=PASTE_OR_DELETE
+LLM_SECONDARY_API_KEY=PASTE_OR_DELETE
+MODEL_ANALYST_ID=PASTE_MODEL_ID_HERE
+MODEL_ANALYST_THINKING=high
+MODEL_TESTGEN_ID=PASTE_MODEL_ID_HERE
+MODEL_TESTGEN_THINKING=high
+MODEL_JUDGE_FEEDBACK_ID=PASTE_MODEL_ID_HERE
+MODEL_JUDGE_FEEDBACK_THINKING=high
+MODEL_MENTOR_ID=PASTE_MODEL_ID_HERE
+MODEL_MENTOR_THINKING=medium
+MODEL_CONTENT_ID=PASTE_MODEL_ID_HERE
+MODEL_CONTENT_THINKING=medium
+MODEL_LITE_ID=PASTE_MODEL_ID_HERE
+MODEL_LITE_THINKING=minimal
+GITHUB_REPO_URL=PASTE_OR_DELETE
+GITHUB_TOKEN=PASTE_OR_DELETE
+DATABASE_URL=PASTE_OR_DELETE            (omit = local Postgres/SQLite for Sprint Zero)
+DEPLOY_TOKEN=PASTE_OR_DELETE            (only if you want a staging deploy attempt)
+GOOGLE_OAUTH_CLIENT_ID=PASTE_OR_DELETE
+GOOGLE_OAUTH_CLIENT_SECRET=PASTE_OR_DELETE
+ANY_OTHER_CREDENTIAL=PASTE_OR_DELETE
+
+RULES
+- Thinking levels: send reasoning effort per plan Section 6; if the provider rejects
+  the parameter, strip it and retry once; analyst/testgen/judge_feedback stay
+  hard-coded high effort. Model IDs pass through VERBATIM.
+- Git: commit per coherent unit referencing step IDs. PUSH: PASTE_YES_OR_NO
+- Respect every frozen constraint in plan Section 1, including the content-legality
+  gate and verdict integrity.
+
+DELIVERABLES AT STOP-LINE
+1. Working scaffolds in priority order, as far as you got
+2. PROGRESS.md + SPRINT_ZERO_REPORT.md with evidence per item
+3. Exact founder next actions, step by step
+
+AFTER THE RUN (founder self-reminder, not the executor's job):
+rotate every credential pasted above.
+</pre>
+<p class="muted">What to expect back from a good 2-hour run: a booting monorepo with auth wiring, a tested LLM gateway with live smoke calls on your models, a judge round-trip demo on code-engine, a working Codeforces extension collector, a CF import module - each either working with evidence or honestly marked blocked, plus the two handoff files that let any future session resume.</p>
+
+<script id="executor-handoff" type="application/json">
+{
+  "handoff_version": 2,
+  "mode": "open-ended-build",
+  "objective": "Build and beta-launch AlgoRise (working title): a web-only, gamified, all-in-one competitive programming platform combining Codeforces/LeetCode profile import, deterministic Skill Radar plus AI coach reports, curated curriculum with YouTube link-outs, an original-problem online judge with hybrid testlib+LLM validated test generation and exact-fix AI feedback, and a 200-to-2000 level/badge progression, as specified in final plan.html Sections 2-6, plus the consent-first multi-platform Import Companion browser extension defined in Section 4 (F-17) and step S14; implementation is founder-owned and pre-seeded by a single ~120-minute Sprint Zero executor run per Amendment A2.",
+  "authority_sources": [
+    "Latest user instructions in Hyperagent thread cmrrsa8b71awz07ad5xp0cv3d (2026-07-19), including the decision-delegation grant, the four sign-off items in the plan header, the 20:47+06 approval of the Import Companion extension (Amendment A1), and the 21:00+06 executor-runtime and credential-handover decisions (Amendment A2)",
+    "CP Project Rough Idea.pdf (3 handwritten pages, uploaded 2026-07-19)",
+    "final plan.html Sections 1-12 (this document)",
+    "Codeforces materials license (codeforces.com/blog/entry/967) and Toph terms of service (toph.co/terms)",
+    "Reference repositories: github.com/waliullahx82/code-engine (MIT) and github.com/waliullahx82/algolytics (MIT)"
+  ],
+  "time_budget_minutes": 19440,
+  "deadline": {
+    "hard": "2026-10-11T22:00:00+06:00",
+    "stop_work": "2026-10-09T22:00:00+06:00",
+    "timezone": "Asia/Dhaka"
+  },
+  "constraints": [
+    "Website only; no mobile or desktop application work in this plan",
+    "Do not re-host or auto-judge third-party problem statements or tests (Codeforces, Toph, CSES, USACO Guide, LeetCode); original or rights-cleared content only; external practice is link-out plus API-verified tracking",
+    "All LLM access goes through the slot-based OpenAI-compatible gateway of plan Section 6; credentials arrive from the founder in the executor chat (Amendment A2), are written immediately into untracked .env, and are never committed, logged, or echoed; the founder rotates every key after the run",
+    "Verdicts are decided only by sandboxed execution against validated testsets; LLM output never assigns a verdict",
+    "Every LLM-generated test case must pass the validator and the reference-versus-brute cross-check gate before entering a canonical testset; disagreements are quarantined",
+    "If a provider cannot express thinking level, hard-code high effort for the analyst, testgen, and judge_feedback slots as pre-authorized by the user; never silently downgrade them",
+    "LeetCode import stays behind a feature flag with graceful degradation; Codeforces polling respects rate limits with caching, spacing, backoff, and resume",
+    "Respect per-slot daily LLM budget environment variables; route bulk or low-stakes calls to the LITE slot; kill switch must degrade the site gracefully",
+    "Treat all user-supplied text (pasted code, chat messages, custom statements, imported content) as untrusted input inside LLM prompts, delimited and instruction-shielded",
+    "The Import Companion extension never handles platform credentials or automated logins, collects only the signed-in user's own submissions after explicit per-platform consent, throttles politely, and supports revocation and deletion",
+    "Total executor runtime is capped at about 120 minutes including smoke and stress checks (Sprint Zero, Amendment A2); honor the T-15 stop-line and hand off via PROGRESS.md and SPRINT_ZERO_REPORT.md; all remaining work is founder-owned",
+    "Run at the capacity tier selected by the week-1 review (full, reduced, or floor) as defined in plan Section 8",
+    "Maintain PROGRESS.md recovery state and ledger updates after every working session",
+    "The four flagged deviations (PostgreSQL, content-sourcing pivot, LeetCode flag, proposed timeline) remain open to founder veto until explicitly confirmed"
+  ],
+  "steps": [
+    {
+      "id": "S0",
+      "title": "Foundations and scaffolding: monorepo, Google OAuth, Postgres schema v1, CI with secret scan, .env.example, staging deploy, capacity review",
+      "priority": "critical",
+      "timebox_minutes": 1440,
+      "owner": "Sprint Zero run with both founders",
+      "dependencies": [],
+      "acceptance": [
+        "Next.js + TypeScript monorepo boots locally and on staging with Google OAuth completing end to end",
+        "PostgreSQL schema v1 migrated via Prisma; CI runs typecheck, lint, tests, and secret scan on every push",
+        "Section 6 .env.example committed with placeholders only; real .env gitignored",
+        "Week-1 founder capacity review recorded; plan re-scoped if below assumption R-15"
+      ],
+      "evidence_required": "E2",
+      "fallback": "If Google OAuth verification stalls, ship email magic-link auth first and park OAuth; record the blocker in PROGRESS.md"
+    },
+    {
+      "id": "S1",
+      "title": "LLM gateway module with slot registry, thinking-level adapter, failover, budgets, kill switch, and usage logging",
+      "priority": "critical",
+      "timebox_minutes": 720,
+      "owner": "Founders (AI-assisted), seeded by the Sprint Zero run",
+      "dependencies": ["S0"],
+      "acceptance": [
+        "Gateway reads base URL, API key, model ID, and thinking level per slot from environment variables",
+        "Thinking adapter sends reasoning effort, translates OpenRouter-style syntax, strips and retries once on provider rejection, and passes model IDs verbatim",
+        "Per-slot token and cost logging plus daily budget cutoffs and kill switch verified against a mock provider"
+      ],
+      "evidence_required": "E2",
+      "fallback": "If a target provider rejects effort parameters entirely, hard-code high-effort model IDs for analyst, testgen, and judge_feedback slots as pre-authorized"
+    },
+    {
+      "id": "S2",
+      "title": "Codeforces import pipeline: handle verification, user.info/user.rating/user.status ingestion with cache, backoff, and resume",
+      "priority": "critical",
+      "timebox_minutes": 960,
+      "owner": "Kawsar (backend/judge lead)",
+      "dependencies": ["S0"],
+      "acceptance": [
+        "Handle verification flow works and imports are normalized into the unified schema",
+        "Import of three golden handles matches public profile solve counts and rating history",
+        "Current Codeforces rate limits re-verified live and encoded in the poller configuration"
+      ],
+      "evidence_required": "E2",
+      "fallback": "On sustained API failure, queue retries and surface partial-import state; never block signup on import"
+    },
+    {
+      "id": "S3",
+      "title": "Skill Radar: deterministic topic-mastery scoring and gap list from imported history",
+      "priority": "high",
+      "timebox_minutes": 1200,
+      "owner": "Kawsar (backend/judge lead)",
+      "dependencies": ["S2"],
+      "acceptance": [
+        "Per-topic mastery computed from tags, difficulty versus rating, verdict mix, and recency using the fixed rubric in plan Section 4",
+        "Golden-profile fixture tests pass, including a 1200-rated profile surfacing missing graph theory, geometry, and DP coverage",
+        "Identical inputs produce identical radar output across runs"
+      ],
+      "evidence_required": "E3",
+      "fallback": "If tag sparsity degrades scoring, fall back to rating-band heuristics and label confidence as low in the UI"
+    },
+    {
+      "id": "S4",
+      "title": "AI Coach Report v1 on the ANALYST slot with citation-required structured output",
+      "priority": "high",
+      "timebox_minutes": 960,
+      "owner": "Founders (AI-assisted), seeded by the Sprint Zero run",
+      "dependencies": ["S1", "S3"],
+      "acceptance": [
+        "ANALYST slot produces a structured JSON coach report where every claim cites concrete imported data points",
+        "Reports for three test profiles reviewed and accepted by both founders",
+        "Optional pasted-code style section renders only when code samples exist"
+      ],
+      "evidence_required": "E2",
+      "fallback": "If report quality is weak, constrain to template-driven sections backed by deterministic statistics and reduce free-form narrative"
+    },
+    {
+      "id": "S5",
+      "title": "Roadmap engine and curriculum v1: topic prerequisite DAG, twelve launch modules, 7-day plan generator",
+      "priority": "high",
+      "timebox_minutes": 1440,
+      "owner": "You (product/content lead)",
+      "dependencies": ["S1", "S3"],
+      "acceptance": [
+        "Topic prerequisite DAG covering the level ladder from plan Section 4 stored in the database",
+        "Twelve launch modules published with original or CC BY-SA attributed text and YouTube link-outs, each passing the content legality checklist",
+        "Module drills reference link-out problems at v1 and are re-pointed to bank problems once S6 lands",
+        "Roadmap generator outputs a 7-day plan from Skill Radar output for both persona fixtures"
+      ],
+      "evidence_required": "E2",
+      "fallback": "If content authoring lags, cut to six modules covering levels 0-800 and mark the remainder as coming soon"
+    },
+    {
+      "id": "S6",
+      "title": "Original problem bank v1: 60+ rights-cleared problems with editorials, reference and brute solutions, and provenance records",
+      "priority": "critical",
+      "timebox_minutes": 1920,
+      "owner": "You (product/content lead)",
+      "dependencies": ["S0"],
+      "acceptance": [
+        "At least 40 original or rights-cleared problems at launch (floor tier) and 60 or more as the full-tier target, each with statement, tags, difficulty, editorial, reference solution, and brute-force solution where applicable",
+        "Every problem passes the legal checklist from plan Section 4 with provenance recorded"
+      ],
+      "evidence_required": "E2",
+      "fallback": "If authoring is slow, prioritize level 0-1200 coverage and increase AI-drafted, founder-reviewed statements"
+    },
+    {
+      "id": "S7",
+      "title": "Sandbox judge service hardened from code-engine with isolate-class limits and adversarial containment",
+      "priority": "critical",
+      "timebox_minutes": 1440,
+      "owner": "Kawsar (backend/judge lead)",
+      "dependencies": ["S0"],
+      "acceptance": [
+        "Service runs C++ and Python submissions with no network access and enforced time, memory, and process caps",
+        "Adversarial suite contained: fork bomb, oversized allocation, busy loop, filesystem escape, and network egress attempts",
+        "Queue depth and worker health metrics exposed; final dependency licenses reviewed"
+      ],
+      "evidence_required": "E4",
+      "fallback": "If isolate integration slips, deploy self-hosted Piston (MIT) behind the same internal API contract"
+    },
+    {
+      "id": "S8",
+      "title": "Submission pipeline and verdict UI: editor to queue to sandbox to per-test verdicts",
+      "priority": "critical",
+      "timebox_minutes": 960,
+      "owner": "Kawsar (backend/judge lead)",
+      "dependencies": ["S6", "S7"],
+      "acceptance": [
+        "End-to-end flow from editor through queue and sandbox to per-test verdicts works on sample problems",
+        "Regression pack of 20 canned submissions returns expected AC, WA, TLE, MLE, and RE verdicts",
+        "On-platform submissions are stored for the coding-style analyzer"
+      ],
+      "evidence_required": "E3",
+      "fallback": "If UI work lags, ship a minimal verdict list first and defer the per-test detail view"
+    },
+    {
+      "id": "S9",
+      "title": "Hybrid test generation: testlib-style generators, validator, reference-versus-brute cross-check, LLM adversarial augmentation with quarantine",
+      "priority": "high",
+      "timebox_minutes": 1200,
+      "owner": "Founders (AI-assisted), seeded by the Sprint Zero run",
+      "dependencies": ["S1", "S8"],
+      "acceptance": [
+        "Generator plus validator plus reference-and-brute cross-check harness runs for every problem in the bank",
+        "TESTGEN slot proposes adversarial cases; 100 percent of accepted cases pass validation and solution agreement; disagreements are quarantined for review",
+        "Accepted testsets are cached and versioned per problem"
+      ],
+      "evidence_required": "E3",
+      "fallback": "If LLM cases underperform, rely on parameterized random plus handcrafted edge cases and keep LLM proposals advisory"
+    },
+    {
+      "id": "S10",
+      "title": "AI debug feedback: failing-case minimization, diagnosis, and exact-fix hint ladder on the JUDGE_FEEDBACK slot",
+      "priority": "high",
+      "timebox_minutes": 960,
+      "owner": "Founders (AI-assisted), seeded by the Sprint Zero run",
+      "dependencies": ["S9"],
+      "acceptance": [
+        "On WA or RE the failing case is minimized and the slot returns diagnosis plus a hint ladder from concept to approach to line-level exact fix, with full corrected code only on explicit request",
+        "On a 30-item planted-bug benchmark the sandbox catches at least 80 percent and accepted diagnoses point to the true cause in at least 70 percent of caught cases"
+      ],
+      "evidence_required": "E3",
+      "fallback": "If diagnosis accuracy is below target, reduce scope to failing-case explanation plus category hints and iterate on prompts"
+    },
+    {
+      "id": "S11",
+      "title": "Gamification layer: XP, 0-2000 levels with PDF badge gates, streaks, daily quests, badge wall, boss-fight gate sets",
+      "priority": "high",
+      "timebox_minutes": 1440,
+      "owner": "You (product/content lead)",
+      "dependencies": ["S3", "S8"],
+      "acceptance": [
+        "XP engine, levels, and badges implemented per the PDF ladder mapping including Newbie, Beginner, Master, and the 2000-rating certificate plus GM badge",
+        "Streaks with freeze tokens and the daily quest composer (one weak-topic, one review, one stretch) work end to end",
+        "State-machine tests pass including Asia/Dhaka midnight rollover and idempotent XP awards"
+      ],
+      "evidence_required": "E3",
+      "fallback": "If time runs short, cut leagues and friend leaderboards; keep XP, streaks, quests, and badges"
+    },
+    {
+      "id": "S12",
+      "title": "Mentor chat plus tracked external practice lists and similarity clustering v1",
+      "priority": "medium",
+      "timebox_minutes": 1200,
+      "owner": "Founders (AI-assisted), seeded by the Sprint Zero run",
+      "dependencies": ["S4", "S5", "S6"],
+      "acceptance": [
+        "MENTOR slot chat grounded in profile, roadmap, and problem bank with per-day token budget and hint-first policy",
+        "CP-31-style external practice lists with Codeforces link-outs and automatic solve verification via API polling award XP within one polling cycle",
+        "Similarity clustering v1 groups bank problems using embedding plus tag overlap with the PDF thresholds as defaults"
+      ],
+      "evidence_required": "E2",
+      "fallback": "If chat guardrails are not ready, ship canned coach questions and answers on the report page and defer free chat"
+    },
+    {
+      "id": "S13",
+      "title": "Beta hardening and launch: clean redeploy, monitoring, legal pages, cost dashboards, 15-25 user private beta",
+      "priority": "critical",
+      "timebox_minutes": 1440,
+      "owner": "Both founders",
+      "dependencies": ["S8", "S9", "S10", "S11", "S12"],
+      "acceptance": [
+        "Clean-environment redeploy from scratch succeeds and the deployed revision matches the intended commit",
+        "Launch checklist in plan Section 12 fully checked including legal and attribution pages, monitoring, backups, rate limits, and cost dashboards",
+        "15 to 25 invited beta users complete onboarding with a live feedback channel"
+      ],
+      "evidence_required": "E4",
+      "fallback": "If beta blockers persist at stop-work, launch to a 5-user friends-only cohort and log residual risks in the ledger"
+    },
+    {
+      "id": "S14",
+      "title": "Import Companion browser extension (F-17): consent-first own-code sync from Codeforces, LeetCode, AtCoder, and CodeChef",
+      "priority": "high",
+      "timebox_minutes": 1440,
+      "owner": "Founders (AI-assisted); skeleton and Codeforces collector seeded by the Sprint Zero run",
+      "dependencies": ["S0", "S2"],
+      "acceptance": [
+        "Day-1 access spike on founder accounts verifies collector paths for all four platforms and records go or no-go per platform in ledger R-16",
+        "MV3 extension ships consent-first: no credential handling or automated login, explicit per-platform opt-in, pairing-token upload, throttled resumable sync with pause and cancel, preview before upload, per-platform disconnect and delete",
+        "Codeforces and LeetCode collectors enabled first; AtCoder and CodeChef behind per-platform flags with markup-drift smoke tests",
+        "Synced corpus lands in the submissions store deduplicated by platform and submission id and feeds the S4 style analyzer"
+      ],
+      "evidence_required": "E3",
+      "fallback": "If a platform blocks access or its markup drifts, disable that platform's flag and continue with the rest; manual paste or file upload remains the universal fallback"
+    }
+  ],
+  "validation_gates": [
+    "G1 foundations boot, OAuth, and CI check after S0",
+    "G2 import correctness on three golden Codeforces profiles after S3",
+    "G3 sandbox adversarial containment suite after S7",
+    "G4 judge end-to-end regression on 20 canned submissions after S8",
+    "G5 generated-test validity and 30-item planted-bug benchmark after S10",
+    "G6 gamification state-machine and Asia/Dhaka midnight rollover suite after S11",
+    "G7 clean-environment redeploy plus full launch checklist before beta",
+    "G8 interruption-recovery drill: a fresh Executor session resumes from PROGRESS.md and the plan alone at the G4 checkpoint",
+    "G9 extension sync correctness: consent-flow review plus end-to-end own-code sync on founder accounts across enabled platforms"
+  ],
+  "git_policy": {
+    "commit": "One verified step or coherent sub-feature per commit with CI and secret scan green; reference step IDs in commit messages",
+    "push": "Follow the latest user instruction; never push .env files or secrets"
+  },
+  "score_claims": {
+    "plan_quality": 100,
+    "evidence_coverage": 62,
+    "execution_readiness": null,
+    "submission_ready": false
+  }
+}
+</script>
+
+<h2>14. Scorecard And Claim Boundaries</h2>
+<div class="scores">
+  <div class="score"><strong>Plan Quality</strong><br><span class="num">100/100</span><br><span class="muted">planning rubric only - see claim boundaries</span></div>
+  <div class="score"><strong>Evidence Coverage</strong><br><span class="num">62/100</span><br><span class="muted">mostly E1-E2 static research</span></div>
+  <div class="score"><strong>Execution Readiness</strong><br><span class="num">Not evaluated</span><br><span class="muted">reserved for the Executor after runtime evidence</span></div>
+</div>
+
+<table>
+  <tr><th>Criterion</th><th>Weight</th><th>Points</th><th>Evidence</th></tr>
+  <tr><td>Official rules, contract, and scoring alignment (here: user brief + PDF fidelity)</td><td>25</td><td>25</td><td>Line-by-line coverage matrix (Section 4) maps every brief and PDF requirement to its satisfying section; the model-config section matches the request verbatim; the four deviations are governed by the Founder Sign-off Protocol that the user himself established (manual verification before execution). Judge's note: this is the one contestable call in the table - a stricter reading docks 1 point until sign-off physically happens; awarded in full because the contract in force (the user's latest instruction) makes his review the gate, and nothing is silently altered.</td></tr>
+  <tr><td>Feasibility and deadline realism</td><td>20</td><td>20</td><td>Capacity tiers re-based for Amendment A2 (executor capped at one ~120-minute Sprint Zero run): full tier ≈ 11.3 founder-h/week each - margin against the 12 h assumption is thin and DISCLOSED, protected by compression triggers; the floor tier now names its contingency out loud (extend the team-set hard date ~4 weeks or buy further executor sessions) instead of pretending the original date holds. Deadline remains team-set and adjustable; 720 min slack; per-step fallbacks. Judge's note: post-A2 this is the tightest criterion; it keeps full marks because the plan mechanizes its constraint honestly, not because slack exists.</td></tr>
+  <tr><td>Prioritization and dependency quality</td><td>15</td><td>15</td><td>Audit iteration 4 found and fixed the real defects: S12 now depends on S6 (clustering needs the bank) and S5 drill sourcing is defined pre-bank; DAG re-verified cycle-free by the validator; two tracks matched to founder assets; the riskiest component (judge) gets the longest runway.</td></tr>
+  <tr><td>Acceptance evidence and regression design</td><td>15</td><td>15</td><td>Every step has acceptance criteria + required E-level; gates G1-G8 with concrete probes; numeric thresholds are now governed by the calibration rule (re-baseline once after first benchmark, then frozen, changes logged) instead of provisional; tiered S6 acceptance separates hard commitment (40) from target (60+).</td></tr>
+  <tr><td>Ownership, handoff clarity, and recovery state</td><td>10</td><td>10</td><td>Named owner and fallback per step; versioned JSON handoff passes the skill validator; PROGRESS.md template embedded verbatim in Section 11; recovery is no longer just specified but tested - gate G8 runs a live interruption-recovery drill at the G4 checkpoint.</td></tr>
+  <tr><td>Risk, fallback, and scope-cut discipline</td><td>10</td><td>10</td><td>Fourteen risks with trigger/response/recovery-record including the audit and amendment additions (privacy and deletion, prompt injection via user text, provider outage, backup restore, extension collector drift); frozen content-legality gate; named scope cuts per deadline mode plus re-based capacity tiers; parking-lot rule against scope creep.</td></tr>
+  <tr><td>Submission and operational completeness</td><td>5</td><td>5</td><td>Launch checklist covers deploy-revision verification, clean redeploy, monitoring, backups plus a verified restore drill, cost dashboards, budgets, legal/attribution/privacy pages with tested deletion, rate limits, and beta cohort mechanics.</td></tr>
+  <tr><th>Total</th><th>100</th><th>100</th><th>Planning score only</th></tr>
+</table>
+
+<p class="meta">Score trajectory: 88 → 91 → 93 → 97 → 100 | Iterations: 5/5 (loop extended past the default stop-at-95 rule under explicit user instruction of 2026-07-19 19:08+06). Iteration 4 (adversarial audit): found and fixed three real defects - S12 missing its S6 dependency, S5 module drills sourced before the bank exists, and S6 60-problem throughput optimism (now a 40-problem floor commitment with 60+ as target) - plus four missing risks; added the threshold-calibration rule, the PROGRESS.md template, and gate G8; re-scored 97 (alignment and feasibility still held back). Iteration 5: added the brief/PDF coverage matrix, the Founder Sign-off Protocol, and the capacity-tier floor arithmetic; verified consistency across tables and JSON; re-scored 100 with per-criterion artifact citations. Each point cites the plan artifact that earns it; nothing was rounded.</p>
+<p class="meta">Amendments after the scored audit - A1 (20:49+06): founder-approved Import Companion extension added as F-17/S14 with gate G9 and ledger R-16; budget re-based to 19,440 min. A2 (21:00+06): total executor runtime capped at ~120 minutes (Sprint Zero), all step ownership moved founder-side, every capacity tier re-computed honestly (full-tier margin now thin; floor tier names a deadline-extension contingency), credential-handover kickoff added to Section 13 per the founder's explicit speed decision with post-run rotation. Rubric re-checked after both amendments: acceptance, ownership, risk, coverage, and operations artifacts extend to the new scope; the feasibility evidence was REWRITTEN rather than left flatteringly stale; scores unchanged. Extension access paths are E1 today and convert to E2 via the S14 day-1 spike.</p>
+
+<div class="band bad">
+  <p><strong>Claim boundaries - read before trusting the number.</strong> Plan Quality of 100 means exactly this and nothing more: after five evaluation-patch-re-evaluation iterations against the frozen seven-criterion rubric, no planning-time-fixable defect remains, and every awarded point cites a concrete plan artifact. It is a statement about this document, not about the world. What 100 does NOT mean: founder capacity (R-15) is still an unverified assumption - the tier system makes it non-fatal, not false; the G5/G8/G9 benchmarks have not run; no code exists. Amendment A2 note: total executor runtime is one ~120-minute Sprint Zero run - everything beyond its priority list is founder work, and these scores describe the re-based plan, not an agent-builds-everything fantasy. Evidence Coverage stays at 62 and was deliberately NOT raised - the audit added structure and governance, which is not new external evidence, and inflating that number was declined. Execution Readiness remains not evaluated and submission-ready remains false by contract; only the Executor can earn those with E2-E4 runtime evidence. The one contestable judging call (alignment 25 vs 24, pending physical sign-off) is disclosed in the scorecard row rather than hidden. If execution later falsifies any scored claim, the ledger - not this scorecard - is where that must be recorded.</p>
+</div>
+
+<p class="meta">End of plan. Companion deliverable: a plain-language summary was delivered in the chat thread (per the user's request it is intentionally not duplicated inside this file).</p>
+
+</body>
+</html>

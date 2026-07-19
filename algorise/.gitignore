@@ -1,0 +1,21 @@
+# Dependencies and builds
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+
+# Secrets: all real environment files stay local
+.env
+.env.*
+!.env.example
+
+# Runtime data and logs
+*.log
+*.pid
+.DS_Store
+prisma/dev.db
+
+# Generated Prisma client and local visual captures
+src/generated/prisma/
+docs/evidence/*.png

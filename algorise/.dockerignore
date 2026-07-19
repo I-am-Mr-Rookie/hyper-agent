@@ -1,0 +1,12 @@
+.git
+.github
+.next
+node_modules
+services/code-engine/node_modules
+.env
+.env.*
+!.env.example
+coverage
+docs/evidence/*.png
+*.log
+*.tsbuildinfo

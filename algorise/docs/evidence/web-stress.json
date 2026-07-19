@@ -1,0 +1,35 @@
+{
+  "runAt": "2026-07-19T17:54:05.986Z",
+  "target": "http://127.0.0.1:3000",
+  "http": {
+    "requests": 600,
+    "concurrency": 30,
+    "failed": 0,
+    "statuses": {
+      "200": 600
+    },
+    "latencyMs": {
+      "min": 9,
+      "p50": 106,
+      "p95": 342,
+      "p99": 486,
+      "max": 507
+    }
+  },
+  "importCompanion": {
+    "firstImport": {
+      "accepted": 50,
+      "duplicates": 0,
+      "cursor": "50",
+      "private": true
+    },
+    "duplicateRounds": 10,
+    "everyDuplicateSuppressed": true,
+    "deletion": {
+      "deleted": 50,
+      "tokenRevoked": true
+    },
+    "pass": true
+  },
+  "pass": true
+}

@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN:-localhost}
+      - METRICS_TOKEN=${METRICS_TOKEN:-}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+    restart: always
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - AUTH_TOKEN=${AUTH_TOKEN}
+      - PORT=3000
+      - BODY_LIMIT=50mb
+      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-200}
+    depends_on:
+      - redis
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/worker/Dockerfile
+    command: node src/queue/worker.js
+    privileged: true
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis:6379
+      - EXECUTOR_TYPE=isolate
+      - WORKER_CONCURRENCY=${WORKER_CONCURRENCY:-6}
+      - DEFAULT_MEMORY_LIMIT=${DEFAULT_MEMORY_LIMIT:-256000}
+      - MAX_MEMORY_LIMIT=${MAX_MEMORY_LIMIT:-512000}
+      - RESULT_CACHE_TTL=${RESULT_CACHE_TTL:-1800}
+    depends_on:
+      - redis
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '3.5'
+          memory: 10G
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy noeviction
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=7d'
+    restart: always
+
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: always
+
+volumes:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+  caddy_data:
+  caddy_config:

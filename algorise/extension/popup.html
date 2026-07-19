@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AlgoRise Import Companion</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main>
+    <header>
+      <div class="mark">AR</div>
+      <div><strong>Import Companion</strong><span>Private, consent-first sync</span></div>
+    </header>
+
+    <section class="card">
+      <label for="pairing">One-time pairing code</label>
+      <div class="row"><input id="pairing" maxlength="10" autocomplete="off" placeholder="A1B2C3D4E5"><button id="pair">Pair</button></div>
+      <p id="pair-status" class="status">Create a code from AlgoRise settings.</p>
+    </section>
+
+    <section class="card platform">
+      <div class="platform-head"><div><strong>Codeforces</strong><span>Own submissions + source</span></div><button id="connect" class="ghost">Open login</button></div>
+      <label for="handle">Confirm your signed-in handle</label>
+      <input id="handle" autocomplete="off" placeholder="your_handle">
+      <label class="consent"><input type="checkbox" id="consent"><span>I consent to collect my own Codeforces submissions and upload them privately to my AlgoRise account. I can pause, cancel, disconnect, or delete them.</span></label>
+      <div class="row"><button id="sync" class="primary">Sync now</button><button id="pause" class="ghost">Pause</button><button id="cancel" class="danger">Cancel</button></div>
+      <progress id="progress" max="1" value="0"></progress>
+      <p id="sync-status" class="status">Nothing syncs until you check consent and click Sync.</p>
+    </section>
+
+    <section class="disabled">
+      <span>LeetCode</span><span>AtCoder</span><span>CodeChef</span>
+      <small>Feature-flagged until founder-account spikes pass</small>
+    </section>
+  </main>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+name: Sprint Zero CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Secret scan
+        run: npm run secrets:scan
+      - name: Prisma schema
+        run: npm run db:validate
+        env:
+          DATABASE_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder?schema=public
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run compose:validate
+      - run: npm run build
+        env:
+          NEXTAUTH_SECRET: ci-placeholder-not-a-production-secret
+          NEXTAUTH_URL: http://localhost:3000
+          DATABASE_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder?schema=public

@@ -1,0 +1,15 @@
+{
+  "providers": {
+    "primary": { "base_url_env": "LLM_PRIMARY_BASE_URL", "api_key_env": "LLM_PRIMARY_API_KEY", "protocol_env": "LLM_PRIMARY_PROTOCOL" },
+    "secondary": { "base_url_env": "LLM_SECONDARY_BASE_URL", "api_key_env": "LLM_SECONDARY_API_KEY", "protocol_env": "LLM_SECONDARY_PROTOCOL" }
+  },
+  "slots": {
+    "analyst": { "provider": "primary", "model_id_env": "MODEL_ANALYST_ID", "thinking_env": "MODEL_ANALYST_THINKING" },
+    "testgen": { "provider": "primary", "model_id_env": "MODEL_TESTGEN_ID", "thinking_env": "MODEL_TESTGEN_THINKING" },
+    "judge_feedback": { "provider": "primary", "model_id_env": "MODEL_JUDGE_FEEDBACK_ID", "thinking_env": "MODEL_JUDGE_FEEDBACK_THINKING" },
+    "mentor": { "provider": "primary", "model_id_env": "MODEL_MENTOR_ID", "thinking_env": "MODEL_MENTOR_THINKING" },
+    "content": { "provider": "primary", "model_id_env": "MODEL_CONTENT_ID", "thinking_env": "MODEL_CONTENT_THINKING" },
+    "lite": { "provider": "secondary", "model_id_env": "MODEL_LITE_ID", "thinking_env": "MODEL_LITE_THINKING" }
+  },
+  "high_stakes_slots": ["analyst", "testgen", "judge_feedback"]
+}

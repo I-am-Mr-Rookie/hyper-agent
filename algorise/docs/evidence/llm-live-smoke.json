@@ -1,0 +1,148 @@
+{
+  "runAt": "2026-07-19T17:52:45.049417+00:00",
+  "slots": [
+    "analyst",
+    "testgen",
+    "judge_feedback",
+    "mentor",
+    "content",
+    "lite"
+  ],
+  "results": [
+    {
+      "slot": "analyst",
+      "model": "gpt-5.6-sol",
+      "provider": "primary",
+      "reasoningFallbackUsed": false,
+      "parameterFallbacks": [],
+      "latencyMs": 8158,
+      "promptTokens": 2503,
+      "outputTokens": 8,
+      "responseMatched": true,
+      "pass": true
+    },
+    {
+      "slot": "testgen",
+      "model": "gpt-5.6-sol",
+      "provider": "primary",
+      "reasoningFallbackUsed": false,
+      "parameterFallbacks": [],
+      "latencyMs": 12285,
+      "promptTokens": 2502,
+      "outputTokens": 8,
+      "responseMatched": true,
+      "pass": true
+    },
+    {
+      "slot": "judge_feedback",
+      "model": "gpt-5.6-sol",
+      "provider": "primary",
+      "reasoningFallbackUsed": false,
+      "parameterFallbacks": [],
+      "latencyMs": 6882,
+      "promptTokens": 2503,
+      "outputTokens": 8,
+      "responseMatched": true,
+      "pass": true
+    },
+    {
+      "slot": "mentor",
+      "model": "gpt-5.6-terra",
+      "provider": "primary",
+      "reasoningFallbackUsed": false,
+      "parameterFallbacks": [],
+      "latencyMs": 11952,
+      "promptTokens": 2502,
+      "outputTokens": 8,
+      "responseMatched": true,
+      "pass": true
+    },
+    {
+      "slot": "content",
+      "model": "gpt-5.6-terra",
+      "provider": "primary",
+      "reasoningFallbackUsed": false,
+      "parameterFallbacks": [],
+      "latencyMs": 6384,
+      "promptTokens": 2502,
+      "outputTokens": 8,
+      "responseMatched": true,
+      "pass": true
+    },
+    {
+      "slot": "lite",
+      "model": "gpt-5.6-terra",
+      "provider": "secondary",
+      "reasoningFallbackUsed": false,
+      "parameterFallbacks": [],
+      "latencyMs": 3309,
+      "promptTokens": 2502,
+      "outputTokens": 8,
+      "responseMatched": true,
+      "pass": true
+    }
+  ],
+  "usageEvents": [
+    {
+      "slot": "analyst",
+      "provider": "primary",
+      "modelId": "gpt-5.6-sol",
+      "promptTokens": 2503,
+      "outputTokens": 8,
+      "latencyMs": 8145,
+      "estimatedUsd": 0,
+      "status": "success"
+    },
+    {
+      "slot": "testgen",
+      "provider": "primary",
+      "modelId": "gpt-5.6-sol",
+      "promptTokens": 2502,
+      "outputTokens": 8,
+      "latencyMs": 12277,
+      "estimatedUsd": 0,
+      "status": "success"
+    },
+    {
+      "slot": "judge_feedback",
+      "provider": "primary",
+      "modelId": "gpt-5.6-sol",
+      "promptTokens": 2503,
+      "outputTokens": 8,
+      "latencyMs": 6879,
+      "estimatedUsd": 0,
+      "status": "success"
+    },
+    {
+      "slot": "mentor",
+      "provider": "primary",
+      "modelId": "gpt-5.6-terra",
+      "promptTokens": 2502,
+      "outputTokens": 8,
+      "latencyMs": 11950,
+      "estimatedUsd": 0,
+      "status": "success"
+    },
+    {
+      "slot": "content",
+      "provider": "primary",
+      "modelId": "gpt-5.6-terra",
+      "promptTokens": 2502,
+      "outputTokens": 8,
+      "latencyMs": 6367,
+      "estimatedUsd": 0,
+      "status": "success"
+    },
+    {
+      "slot": "lite",
+      "provider": "secondary",
+      "modelId": "gpt-5.6-terra",
+      "promptTokens": 2502,
+      "outputTokens": 8,
+      "latencyMs": 3283,
+      "estimatedUsd": 0,
+      "status": "success"
+    }
+  ],
+  "pass": true
+}

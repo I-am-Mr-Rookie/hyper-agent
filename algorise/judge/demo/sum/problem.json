@@ -1,0 +1,14 @@
+{
+  "slug": "sum-two-integers",
+  "title": "Sum Two Integers",
+  "origin": "ORIGINAL",
+  "rights_cleared": true,
+  "difficulty": 200,
+  "statement": "Read two signed 32-bit integers and print their sum.",
+  "input": "Two integers a and b.",
+  "output": "Print a + b.",
+  "sample_input": "7 35\n",
+  "sample_output": "42\n",
+  "time_limit_seconds": 1,
+  "memory_limit_kb": 65536
+}

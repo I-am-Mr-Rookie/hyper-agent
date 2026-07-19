@@ -1,0 +1,353 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Platform {
+  CODEFORCES
+  LEETCODE
+  ATCODER
+  CODECHEF
+  ALGORISE
+}
+
+enum Verdict {
+  QUEUED
+  RUNNING
+  ACCEPTED
+  WRONG_ANSWER
+  TIME_LIMIT_EXCEEDED
+  MEMORY_LIMIT_EXCEEDED
+  RUNTIME_ERROR
+  COMPILATION_ERROR
+  INTERNAL_ERROR
+}
+
+enum ContentOrigin {
+  ORIGINAL
+  RIGHTS_CLEARED
+  CC_BY_SA_ATTRIBUTED
+  EXTERNAL_LINK_ONLY
+}
+
+enum QuestStatus {
+  ACTIVE
+  COMPLETE
+  EXPIRED
+}
+
+model User {
+  id               String            @id @default(cuid())
+  name             String?
+  username         String?           @unique
+  email            String            @unique
+  emailVerified    DateTime?
+  image             String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  accounts          Account[]
+  sessions          Session[]
+  externalProfiles  ExternalProfile[]
+  submissions       Submission[]
+  xpEvents          XPEvent[]
+  streak            Streak?
+  badges            UserBadge[]
+  quests            Quest[]
+  coachReports      CoachReport[]
+  llmUsage          LLMUsageLog[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refreshToken      String? @db.Text
+  accessToken       String? @db.Text
+  expiresAt         Int?
+  tokenType         String?
+  scope             String?
+  idToken           String? @db.Text
+  sessionState      String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("auth_accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("auth_sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("auth_verification_tokens")
+}
+
+model ExternalProfile {
+  id          String       @id @default(cuid())
+  userId      String
+  platform    Platform
+  handle      String
+  verifiedAt  DateTime?
+  syncCursor  Json?
+  lastSyncedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+
+  @@unique([userId, platform, handle])
+  @@index([platform, handle])
+  @@map("external_profiles")
+}
+
+model Problem {
+  id             String         @id @default(cuid())
+  slug           String         @unique
+  title          String
+  statement      String         @db.Text
+  editorial      String?        @db.Text
+  difficulty     Int
+  origin         ContentOrigin  @default(ORIGINAL)
+  provenanceUrl  String?
+  license        String?
+  rightsCleared  Boolean        @default(false)
+  published      Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  testsets       Testset[]
+  submissions    Submission[]
+  tags           ProblemTag[]
+  topics         ProblemTopic[]
+
+  @@index([difficulty, published])
+  @@map("problems")
+}
+
+model Testset {
+  id              String   @id @default(cuid())
+  problemId       String
+  version         Int      @default(1)
+  checksum        String
+  validatorPath   String
+  generatorPath   String?
+  referencePath   String
+  brutePath       String?
+  machineValidated Boolean @default(false)
+  createdAt       DateTime @default(now())
+  problem         Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([problemId, version])
+  @@map("testsets")
+}
+
+model Tag {
+  id       String       @id @default(cuid())
+  slug     String       @unique
+  label    String
+  problems ProblemTag[]
+
+  @@map("tags")
+}
+
+model ProblemTag {
+  problemId String
+  tagId     String
+  weight    Float   @default(1)
+  problem   Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([problemId, tagId])
+  @@map("problem_tags")
+}
+
+model Topic {
+  id            String              @id @default(cuid())
+  slug          String              @unique
+  title         String
+  level         Int
+  problems      ProblemTopic[]
+  modules       Module[]
+  prerequisites TopicPrerequisite[] @relation("topic")
+  unlockedBy    TopicPrerequisite[] @relation("prerequisite")
+
+  @@index([level])
+  @@map("topics")
+}
+
+model TopicPrerequisite {
+  topicId        String
+  prerequisiteId String
+  topic          Topic @relation("topic", fields: [topicId], references: [id], onDelete: Cascade)
+  prerequisite   Topic @relation("prerequisite", fields: [prerequisiteId], references: [id], onDelete: Cascade)
+
+  @@id([topicId, prerequisiteId])
+  @@map("topic_prerequisites")
+}
+
+model ProblemTopic {
+  problemId String
+  topicId   String
+  problem   Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  topic     Topic   @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([problemId, topicId])
+  @@map("problem_topics")
+}
+
+model Module {
+  id            String        @id @default(cuid())
+  topicId       String
+  slug          String        @unique
+  title         String
+  body          String        @db.Text
+  origin        ContentOrigin @default(ORIGINAL)
+  provenanceUrl String?
+  license       String?
+  published     Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  topic         Topic         @relation(fields: [topicId], references: [id], onDelete: Restrict)
+
+  @@map("modules")
+}
+
+model Submission {
+  id                   String           @id @default(cuid())
+  userId               String
+  problemId            String?
+  externalProfileId    String?
+  platform             Platform         @default(ALGORISE)
+  platformSubmissionId String?
+  submissionUrl        String?
+  language             String
+  sourceCode           String           @db.Text
+  verdict              Verdict          @default(QUEUED)
+  executionTimeMs      Int?
+  memoryKb             Int?
+  submittedAt          DateTime         @default(now())
+  privateImportedCode  Boolean          @default(false)
+  user                  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem               Problem?         @relation(fields: [problemId], references: [id], onDelete: SetNull)
+  externalProfile       ExternalProfile? @relation(fields: [externalProfileId], references: [id], onDelete: SetNull)
+
+  @@unique([platform, platformSubmissionId])
+  @@index([userId, submittedAt])
+  @@index([problemId, verdict])
+  @@map("submissions")
+}
+
+model XPEvent {
+  id             String   @id @default(cuid())
+  userId         String
+  amount         Int
+  reason         String
+  idempotencyKey String   @unique
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("xp_events")
+}
+
+model Streak {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  currentDays    Int      @default(0)
+  longestDays    Int      @default(0)
+  freezeTokens   Int      @default(2)
+  lastActiveDate DateTime?
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("streaks")
+}
+
+model Badge {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  title       String
+  description String
+  minLevel    Int
+  users       UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  userId    String
+  badgeId   String
+  awardedAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, badgeId])
+  @@map("user_badges")
+}
+
+model Quest {
+  id          String      @id @default(cuid())
+  userId      String
+  title       String
+  payload     Json
+  status      QuestStatus @default(ACTIVE)
+  expiresAt   DateTime
+  completedAt DateTime?
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, expiresAt])
+  @@map("quests")
+}
+
+model CoachReport {
+  id            String   @id @default(cuid())
+  userId        String
+  schemaVersion Int      @default(1)
+  report        Json
+  evidence      Json
+  generatedAt   DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, generatedAt])
+  @@map("coach_reports")
+}
+
+model LLMUsageLog {
+  id           String   @id @default(cuid())
+  userId       String?
+  slot         String
+  provider     String
+  modelId      String
+  promptTokens Int?
+  outputTokens Int?
+  latencyMs    Int
+  estimatedUsd Decimal? @db.Decimal(10, 6)
+  status       String
+  errorCode    String?
+  createdAt    DateTime @default(now())
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([slot, createdAt])
+  @@index([userId, createdAt])
+  @@map("llm_usage_log")
+}

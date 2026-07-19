@@ -1,0 +1,11 @@
+{
+  "runAt": "2026-07-19T17:56:21.468Z",
+  "status": 200,
+  "service": "algorise-web",
+  "healthy": true,
+  "localDemoAvailable": true,
+  "llmPrimaryConfigured": true,
+  "llmSecondaryConfigured": true,
+  "latencyMs": 69,
+  "pass": true
+}

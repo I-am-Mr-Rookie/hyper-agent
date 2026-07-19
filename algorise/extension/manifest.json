@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "AlgoRise Import Companion",
+  "version": "0.1.0",
+  "description": "Consent-first import of your own competitive-programming submissions into your local AlgoRise account.",
+  "permissions": ["storage", "alarms"],
+  "host_permissions": [
+    "https://codeforces.com/*",
+    "https://leetcode.com/*",
+    "https://atcoder.jp/*",
+    "https://www.codechef.com/*",
+    "http://localhost:3000/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "AlgoRise Import Companion",
+    "default_popup": "popup.html"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}

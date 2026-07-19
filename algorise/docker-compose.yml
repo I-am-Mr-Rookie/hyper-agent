@@ -1,0 +1,117 @@
+name: algorise-local
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: algorise
+      POSTGRES_PASSWORD: algorise
+      POSTGRES_DB: algorise
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U algorise -d algorise"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+  web-migrate:
+    build:
+      context: .
+      target: migrate
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://algorise:algorise@postgres:5432/algorise?schema=public
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  web:
+    build:
+      context: .
+      target: runner
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      NEXTAUTH_URL: http://localhost:3000
+      DATABASE_URL: postgresql://algorise:algorise@postgres:5432/algorise?schema=public
+      REDIS_URL: redis://redis:6379
+      JUDGE_BASE_URL: http://judge-api:3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      web-migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  judge-api:
+    build:
+      context: ./services/code-engine
+      dockerfile: docker/executor/Dockerfile
+    ports:
+      - "3100:3000"
+    environment:
+      NODE_ENV: development
+      REDIS_URL: redis://redis:6379
+      AUTH_TOKEN: ${JUDGE_AUTH_TOKEN:-replace-local-token}
+      EXECUTOR_TYPE: docker
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  judge-worker:
+    build:
+      context: ./services/code-engine
+      dockerfile: docker/executor/Dockerfile
+    command: node src/queue/worker.js
+    environment:
+      NODE_ENV: development
+      REDIS_URL: redis://redis:6379
+      EXECUTOR_TYPE: docker
+      WORKER_CONCURRENCY: 2
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:

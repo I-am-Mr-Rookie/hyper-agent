@@ -1,0 +1,84 @@
+{
+  "runAt": "2026-07-19T17:54:11.898Z",
+  "baseUrl": "http://127.0.0.1:3000",
+  "results": [
+    {
+      "name": "home",
+      "path": "/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": 200,
+      "title": "AlgoRise — Competitive programming, with direction",
+      "h1": "Competitive programming,with direction.",
+      "horizontalOverflowPx": 0,
+      "overflowOffenders": [],
+      "buttonsWithoutNames": 0,
+      "linksWithoutNames": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "pass": true
+    },
+    {
+      "name": "dashboard",
+      "path": "/dashboard",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "status": 200,
+      "title": "AlgoRise — Competitive programming, with direction",
+      "h1": "Good evening, founder.",
+      "horizontalOverflowPx": 0,
+      "overflowOffenders": [],
+      "buttonsWithoutNames": 0,
+      "linksWithoutNames": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "pass": true
+    },
+    {
+      "name": "home-mobile",
+      "path": "/",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "title": "AlgoRise — Competitive programming, with direction",
+      "h1": "Competitive programming,with direction.",
+      "horizontalOverflowPx": 0,
+      "overflowOffenders": [],
+      "buttonsWithoutNames": 0,
+      "linksWithoutNames": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "pass": true
+    },
+    {
+      "name": "dashboard-mobile",
+      "path": "/dashboard",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "status": 200,
+      "title": "AlgoRise — Competitive programming, with direction",
+      "h1": "Good evening, founder.",
+      "horizontalOverflowPx": 0,
+      "overflowOffenders": [],
+      "buttonsWithoutNames": 0,
+      "linksWithoutNames": 0,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "pass": true
+    },
+    {
+      "name": "pairing-interaction",
+      "pairingCodeRendered": true,
+      "pass": true
+    }
+  ],
+  "pass": true
+}

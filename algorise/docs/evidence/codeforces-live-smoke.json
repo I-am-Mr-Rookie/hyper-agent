@@ -1,0 +1,11 @@
+{
+  "runAt": "2026-07-19T16:49:45.263Z",
+  "status": 200,
+  "source": "Codeforces official API",
+  "handle": "tourist",
+  "submissionCount": 5,
+  "sourceCodeImported": false,
+  "partial": true,
+  "latencyMs": 4564,
+  "pass": true
+}
