@@ -256,7 +256,8 @@ router.post('/', validateSubmission, async (req, res, next) => {
 
     if (wait) {
       // Wait for result
-      const result = await waitForResult(submission.token);
+      // The record can expire or be deleted while we poll; fall back to the queued submission.
+      const result = (await waitForResult(submission.token)) || submission;
       res.status(201).json(formatSubmission(result, { base64Encoded, fields }));
     } else {
       // Return immediately with token

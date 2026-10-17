@@ -39,6 +39,11 @@ describe("LLM slot config", () => {
     expect(loadGatewayConfig({ ...env, LLM_PRIMARY_BASE_URL: "https://api-t2-sg.freemodel.dev/v1" }).providers.primary?.protocol).toBe("responses");
   });
 
+  it("rejects non-numeric budgets instead of silently disabling them", () => {
+    expect(() => loadGatewayConfig({ ...env, LLM_DAILY_BUDGET_USD_TOTAL: "ten" })).toThrow(/LLM_DAILY_BUDGET_USD_TOTAL/);
+    expect(loadGatewayConfig({ ...env, LLM_DAILY_BUDGET_USD_TOTAL: "0" }).dailyBudgetUsd).toBe(0);
+  });
+
   it("fails closed when no credentials exist", () => {
     const config = loadGatewayConfig({ MODEL_ANALYST_ID: "analyst" });
     expect(() => assertConfiguredSlot(config, "analyst")).toThrow(/No provider credentials/);

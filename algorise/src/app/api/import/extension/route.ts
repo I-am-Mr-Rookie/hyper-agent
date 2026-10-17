@@ -9,9 +9,17 @@ function bearerToken(request: NextRequest): string {
 }
 
 export async function POST(request: NextRequest) {
+  let grant;
   try {
-    const grant = importCompanionStore.authorize(bearerToken(request));
-    const payload = extensionUploadSchema.parse(await request.json());
+    grant = importCompanionStore.authorize(bearerToken(request));
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const parsed = extensionUploadSchema.safeParse(await request.json().catch(() => null));
+    if (!parsed.success) return NextResponse.json({ error: "Invalid upload payload", issues: parsed.error.issues }, { status: 400 });
+    const payload = parsed.data;
     if (!platformEnabled(payload.platform)) {
       return NextResponse.json({ error: `${payload.platform} collector is disabled` }, { status: 409 });
     }
@@ -31,7 +39,7 @@ export async function POST(request: NextRequest) {
     const result = importCompanionStore.importBatch(grant.userId, batch);
     return NextResponse.json({ ...result, cursor: payload.cursor, private: true });
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Upload failed" }, { status: 400 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Upload failed" }, { status: 500 });
   }
 }
 

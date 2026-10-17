@@ -38,10 +38,12 @@ const submissionSchema = Joi.object({
     try {
       const url = new URL(value);
       // Block internal/private networks (SSRF protection)
-      const hostname = url.hostname;
+      // shortcut: hostname string checks only; DNS names that resolve to private IPs still pass. Resolve and check the IP before production use.
+      const hostname = url.hostname.toLowerCase();
       if (
         hostname === 'localhost' ||
-        hostname === '127.0.0.1' ||
+        hostname.startsWith('127.') ||
+        hostname.startsWith('[') || // IPv6 literals (e.g. [::1], [::ffff:127.0.0.1]) are not needed for callbacks
         hostname === '::1' ||
         hostname === '0.0.0.0' ||
         hostname.startsWith('10.') ||

@@ -3,13 +3,15 @@ import { CodeforcesApiError, CodeforcesClient, normalizeSubmissions } from "@/li
 
 export const runtime = "nodejs";
 
+// One client per process so the cache and courtesy spacing apply across requests, not just within one.
+const client = new CodeforcesClient();
+
 export async function GET(request: NextRequest) {
   const handle = request.nextUrl.searchParams.get("handle") ?? "";
   const rawLimit = Number(request.nextUrl.searchParams.get("limit") || 250);
-  const limit = Math.min(1_000, Math.max(1, Number.isFinite(rawLimit) ? rawLimit : 250));
+  const limit = Math.min(1_000, Math.max(1, Number.isFinite(rawLimit) ? Math.floor(rawLimit) : 250));
 
   try {
-    const client = new CodeforcesClient();
     const snapshot = await client.importSnapshot(handle, limit);
     return NextResponse.json({
       source: "Codeforces official API",

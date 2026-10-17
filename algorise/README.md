@@ -35,7 +35,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000). Health: [http://localhost:3000/api/health](http://localhost:3000/api/health).
 
-For the complete Dockerized local stack (web + migration + PostgreSQL + Redis + judge API/worker), run `npm run local:up`. See `docs/LOCAL_RUN.md` for LLM environment smoke calls and deployment handoff.
+For the complete Dockerized local stack (web + migration + PostgreSQL + Redis + judge API/worker), run `npm run local:up`. All published ports bind to `127.0.0.1` only. See `docs/LOCAL_RUN.md` for LLM environment smoke calls and deployment handoff.
 
 ## Database and judge services
 
@@ -61,7 +61,7 @@ Load `extension/` as an unpacked Chromium extension. Generate a one-time pairing
 npm run verify
 ```
 
-This executes lint, strict TypeScript checks, Vitest and extension tests, Prisma schema validation, a production Next.js build, and the repository secret scan. Docker judge gates are separate because they require a privileged Docker-capable host.
+This executes lint, strict TypeScript checks, Vitest and extension tests, Prisma schema validation, the Compose contract check, a production Next.js build, and the repository secret scan. Docker judge gates are separate because they require a privileged Docker-capable host. Offline judge executor unit tests run with `cd services/code-engine && npm ci && node --test tests/executor.test.js`.
 
 ## Model slots
 

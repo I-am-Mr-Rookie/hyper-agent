@@ -45,10 +45,13 @@ class DockerExecutor {
 
       // If compiled language, run compilation first
       if (language.compile_cmd) {
+        const compileCmd = submission.compiler_options
+          ? `${language.compile_cmd} ${submission.compiler_options}`
+          : language.compile_cmd;
         const compileResult = await this.runCommand(
           container,
-          language.compile_cmd,
-          submission.compiler_options,
+          compileCmd,
+          null,
           submission.cpu_time_limit + submission.cpu_extra_time,
           ''
         );
@@ -397,9 +400,13 @@ class DockerExecutor {
         const stdoutChunks = [];
         const stderrChunks = [];
 
-        stream.on('data', (chunk) => {
+        // Frames can span chunk boundaries, so keep the unparsed tail for the next chunk.
+        let pending = Buffer.alloc(0);
+
+        stream.on('data', (incoming) => {
           // Docker multiplexes stdout/stderr with 8-byte header
           // Header: [stream type (1 byte), 0, 0, 0, size (4 bytes)]
+          const chunk = pending.length ? Buffer.concat([pending, incoming]) : incoming;
           let offset = 0;
           while (offset < chunk.length) {
             if (offset + 8 > chunk.length) break;
@@ -409,7 +416,7 @@ class DockerExecutor {
 
             if (offset + 8 + size > chunk.length) break;
 
-            const data = chunk.slice(offset + 8, offset + 8 + size);
+            const data = chunk.subarray(offset + 8, offset + 8 + size);
 
             if (streamType === 1) {
               stdoutChunks.push(data);
@@ -419,6 +426,7 @@ class DockerExecutor {
 
             offset += 8 + size;
           }
+          pending = chunk.subarray(offset);
         });
 
         stream.on('end', async () => {

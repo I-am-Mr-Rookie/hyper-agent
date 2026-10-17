@@ -135,7 +135,8 @@ export class CodeforcesClient {
         }
       }
 
-      throw lastError instanceof Error ? lastError : new CodeforcesApiError("Codeforces API request failed", true);
+      // Transport failures (timeouts, DNS, bad JSON) are upstream problems, not client errors.
+      throw lastError instanceof CodeforcesApiError ? lastError : new CodeforcesApiError("Codeforces API is unreachable", true, 503);
     });
   }
 }

@@ -63,7 +63,7 @@ async function run(testCase) {
   });
   const payload = await response.json();
   const actual = payload.status?.description || `HTTP ${response.status}`;
-  return { name: testCase.name, expected: testCase.expected, actual, pass: response.ok && testCase.expected.includes(actual) };
+  return { name: testCase.name, expected: testCase.expected, actual, pass: response.ok && testCase.expected.some((label) => actual === label || actual.startsWith(`${label} (`)) };
 }
 
 const results = [];

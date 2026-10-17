@@ -30,6 +30,9 @@ async function sendCallback(callbackUrl, submission) {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(submission),
+      // Following redirects would bypass the private-network check done on the original URL.
+      redirect: 'manual',
+      signal: AbortSignal.timeout(10000),
     });
 
     logger.info({

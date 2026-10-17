@@ -4,7 +4,7 @@ export async function exchangePairingCode(baseUrl, code) {
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ action: "exchange", code }),
   });
-  const payload = await response.json();
+  const payload = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(payload.error || "Pairing failed");
   return payload.uploadToken;
 }
@@ -18,7 +18,7 @@ export async function uploadBatch(baseUrl, uploadToken, payload) {
     },
     body: JSON.stringify(payload),
   });
-  const result = await response.json();
+  const result = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(result.error || "Upload failed");
   return result;
 }

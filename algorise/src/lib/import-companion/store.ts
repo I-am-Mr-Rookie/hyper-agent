@@ -27,7 +27,16 @@ export class ImportCompanionStore {
   private readonly tokens = new Map<string, PairingGrant>();
   private readonly submissions = new Map<string, ImportedSubmission & { userId: string }>();
 
+  // Unexchanged codes and expired tokens would otherwise accumulate for the process lifetime.
+  private pruneExpired(): void {
+    const now = Date.now();
+    for (const map of [this.pairingCodes, this.tokens]) {
+      for (const [key, grant] of map) if (grant.expiresAt < now) map.delete(key);
+    }
+  }
+
   createPairingCode(userId: string, ttlMs = 10 * 60_000): { code: string; expiresAt: number } {
+    this.pruneExpired();
     const code = randomBytes(5).toString("hex").toUpperCase();
     const expiresAt = Date.now() + ttlMs;
     this.pairingCodes.set(digest(code), { userId, expiresAt });
@@ -47,6 +56,7 @@ export class ImportCompanionStore {
   }
 
   authorize(token: string): PairingGrant {
+    this.pruneExpired();
     const candidate = Buffer.from(digest(token));
     let matched: PairingGrant | undefined;
     for (const [storedDigest, grant] of this.tokens) {

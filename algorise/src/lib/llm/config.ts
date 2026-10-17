@@ -73,6 +73,14 @@ function readProvider(env: Partial<NodeJS.ProcessEnv>, name: "primary" | "second
   };
 }
 
+// A NaN budget would make every `used + estimate > budget` check false and silently disable the cap.
+function readLimit(env: Partial<NodeJS.ProcessEnv>, key: string, fallback: number): number {
+  const raw = env[key]?.trim();
+  const value = raw ? Number(raw) : fallback;
+  if (!Number.isFinite(value) || value < 0) throw new Error(`${key} must be a non-negative number`);
+  return value;
+}
+
 export function loadGatewayConfig(env: Partial<NodeJS.ProcessEnv> = process.env): GatewayConfig {
   const providers: GatewayConfig["providers"] = {
     primary: readProvider(env, "primary"),
@@ -104,8 +112,8 @@ export function loadGatewayConfig(env: Partial<NodeJS.ProcessEnv> = process.env)
   return {
     providers,
     slots,
-    dailyBudgetUsd: Number(env.LLM_DAILY_BUDGET_USD_TOTAL || 10),
-    mentorDailyTokensPerUser: Number(env.LLM_MENTOR_DAILY_TOKENS_PER_USER || 20_000),
+    dailyBudgetUsd: readLimit(env, "LLM_DAILY_BUDGET_USD_TOTAL", 10),
+    mentorDailyTokensPerUser: readLimit(env, "LLM_MENTOR_DAILY_TOKENS_PER_USER", 20_000),
     killSwitch: env.LLM_KILL_SWITCH === "true",
   };
 }

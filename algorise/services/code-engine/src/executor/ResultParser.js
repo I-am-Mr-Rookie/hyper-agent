@@ -19,8 +19,8 @@ class ResultParser {
     } else if (exitCode === 0) {
       status = getStatusById(3); // Accepted
     } else if (exitCode === 137 || exitCode === 9) {
-      // Killed by SIGKILL (out of memory or timeout)
-      status = getStatusById(5); // Time Limit Exceeded
+      // SIGKILL without our timeout firing: almost always the cgroup OOM killer, not a time limit
+      status = getStatusById(12); // Runtime Error (Other)
       exitSignal = 9;
     } else if (exitCode === 139 || exitCode === 11) {
       // SIGSEGV
