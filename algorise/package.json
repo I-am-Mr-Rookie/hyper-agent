@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Local-first Sprint Zero scaffold for a gamified competitive-programming platform.",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=20.9.0"
   },
   "scripts": {
     "dev": "next dev",
@@ -35,7 +35,7 @@
   "dependencies": {
     "@prisma/client": "6.7.0",
     "lucide-react": "1.25.0",
-    "next": "16.2.10",
+    "next": "16.4.2",
     "next-auth": "4.24.15",
     "openai": "6.48.0",
     "react": "19.2.7",
@@ -48,7 +48,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.10",
+    "eslint-config-next": "16.4.2",
     "playwright": "^1.61.1",
     "prisma": "6.7.0",
     "tailwindcss": "^4",
@@ -59,6 +59,6 @@
   },
   "overrides": {
     "uuid": "11.1.1",
-    "postcss": "8.5.10"
+    "postcss": "8.5.30"
   }
 }

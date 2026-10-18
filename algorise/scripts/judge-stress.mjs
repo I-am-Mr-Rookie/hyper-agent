@@ -1,3 +1,4 @@
+try { process.loadEnvFile?.(".env"); } catch { /* Explicit shell env is also supported. */ }
 import { mkdir, writeFile } from "node:fs/promises";
 
 const baseUrl = process.env.JUDGE_BASE_URL || "http://localhost:3100";

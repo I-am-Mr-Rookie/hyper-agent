@@ -17,7 +17,7 @@ A local-first foundation for a web-only, gamified competitive-programming platfo
 
 ## Prerequisites
 
-- Node.js 20+ (Node 22 recommended)
+- Node.js 20.9+ (Node 22 recommended; Next.js 16.4 requires 20.9)
 - npm 10+
 - Docker Desktop / Docker Engine for PostgreSQL, Redis, and judge runtime tests
 
@@ -61,7 +61,7 @@ Load `extension/` as an unpacked Chromium extension. Generate a one-time pairing
 npm run verify
 ```
 
-This executes lint, strict TypeScript checks, Vitest and extension tests, Prisma schema validation, the Compose contract check, a production Next.js build, and the repository secret scan. Docker judge gates are separate because they require a privileged Docker-capable host. Offline judge executor unit tests run with `cd services/code-engine && npm ci && node --test tests/executor.test.js`.
+This executes lint, strict TypeScript checks, Vitest and extension tests, Prisma schema validation, the Compose contract check, a production Next.js build, and the repository secret scan. Docker judge gates are separate because they require a privileged Docker-capable host. Offline judge unit tests (executor, verdicts, request validation) run with `cd services/code-engine && npm ci && node --test tests/executor.test.js tests/validation.test.js`; the judge's own `npm test` also runs `tests/api.test.js`, which needs a running judge API.
 
 ## Model slots
 

@@ -117,7 +117,12 @@ export class CodeforcesClient {
           if (response.status === 429 || response.status >= 500) {
             throw new CodeforcesApiError(`Codeforces returned ${response.status}`, true, response.status);
           }
-          if (!response.ok) throw new CodeforcesApiError(`Codeforces returned ${response.status}`, false, response.status);
+          if (!response.ok) {
+            // Codeforces explains 4xx failures (e.g. unknown handle) in the JSON comment.
+            const failure = (await response.json().catch(() => null)) as CodeforcesApiResponse<T> | null;
+            const comment = failure?.comment;
+            throw new CodeforcesApiError(comment || `Codeforces returned ${response.status}`, false, comment && /not found/i.test(comment) ? 404 : response.status);
+          }
 
           const payload = (await response.json()) as CodeforcesApiResponse<T>;
           if (payload.status !== "OK" || payload.result === undefined) {
@@ -125,6 +130,8 @@ export class CodeforcesClient {
             throw new CodeforcesApiError(payload.comment || "Codeforces API request failed", retryable);
           }
 
+          // The client is shared per process, so drop expired entries instead of keeping every handle ever looked up.
+          for (const [key, entry] of this.cache) if (entry.expiresAt <= Date.now()) this.cache.delete(key);
           this.cache.set(cacheKey, { expiresAt: Date.now() + this.cacheTtlMs, value: payload.result });
           return payload.result;
         } catch (error) {

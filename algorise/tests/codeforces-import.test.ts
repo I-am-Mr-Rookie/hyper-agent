@@ -69,4 +69,33 @@ describe("Codeforces importer", () => {
     await client.importSnapshot("golden1200", 2);
     expect(maxActive).toBe(1);
   });
+
+  it("surfaces Codeforces' own reason for a 400, and maps an unknown handle to 404", async () => {
+    const fetchMock = vi.fn(async () => new Response(
+      JSON.stringify({ status: "FAILED", comment: "handles: User with handle nobody_zz not found" }),
+      { status: 400, headers: { "content-type": "application/json" } },
+    )) as unknown as typeof fetch;
+    const client = new CodeforcesClient({ fetch: fetchMock, sleep: async () => undefined, minimumSpacingMs: 0 });
+
+    const error = await client.userInfo("nobody_zz").catch((caught: unknown) => caught);
+    expect(error).toMatchObject({ message: "handles: User with handle nobody_zz not found", status: 404, retryable: false });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("evicts expired cache entries so a long-lived shared client does not grow without bound", async () => {
+    vi.useFakeTimers();
+    try {
+      const fetchMock = vi.fn(async () => new Response(JSON.stringify({ status: "OK", result: [] }), { status: 200 })) as unknown as typeof fetch;
+      const client = new CodeforcesClient({ fetch: fetchMock, sleep: async () => undefined, minimumSpacingMs: 0, cacheTtlMs: 1_000 });
+
+      for (let index = 0; index < 50; index += 1) {
+        await client.userRating(`handle_${index}`);
+        vi.advanceTimersByTime(2_000);
+      }
+      // The cache is private; peeking is the only way to observe the leak.
+      expect((client as unknown as { cache: Map<string, unknown> }).cache.size).toBeLessThanOrEqual(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

@@ -401,12 +401,19 @@ class DockerExecutor {
         const stderrChunks = [];
 
         // Frames can span chunk boundaries, so keep the unparsed tail for the next chunk.
-        let pending = Buffer.alloc(0);
+        // Concatenate only once the next frame is complete; re-concatenating every chunk is quadratic.
+        let pending = [];
+        let pendingLength = 0;
+        let needed = 8;
 
         stream.on('data', (incoming) => {
+          pending.push(incoming);
+          pendingLength += incoming.length;
+          if (pendingLength < needed) return;
+
           // Docker multiplexes stdout/stderr with 8-byte header
           // Header: [stream type (1 byte), 0, 0, 0, size (4 bytes)]
-          const chunk = pending.length ? Buffer.concat([pending, incoming]) : incoming;
+          const chunk = pending.length === 1 ? pending[0] : Buffer.concat(pending, pendingLength);
           let offset = 0;
           while (offset < chunk.length) {
             if (offset + 8 > chunk.length) break;
@@ -426,7 +433,10 @@ class DockerExecutor {
 
             offset += 8 + size;
           }
-          pending = chunk.subarray(offset);
+          const rest = chunk.subarray(offset);
+          pending = rest.length ? [rest] : [];
+          pendingLength = rest.length;
+          needed = rest.length >= 8 ? 8 + rest.readUInt32BE(4) : 8;
         });
 
         stream.on('end', async () => {

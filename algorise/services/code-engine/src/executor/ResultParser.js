@@ -1,5 +1,16 @@
 import { getStatusById } from '../languages/index.js';
 
+/**
+ * Compare output with expected output.
+ * Ignores CRLF vs LF, trailing spaces on each line, and trailing blank lines, like most CP checkers.
+ */
+export function compareOutput(actual, expected) {
+  if (!expected) return null;
+
+  const normalize = (text) => text.replace(/\r\n?/g, '\n').split('\n').map((line) => line.trimEnd()).join('\n').trim();
+  return normalize(actual || '') === normalize(expected);
+}
+
 class ResultParser {
   /**
    * Parse execution result and determine status
@@ -45,24 +56,27 @@ class ResultParser {
       status = getStatusById(12); // Runtime Error (Other)
     }
 
-    // Truncate output if too long
-    const maxOutputLength = 65536;
-    const truncatedStdout = this.truncate(stdout, maxOutputLength);
-    const truncatedStderr = this.truncate(stderr, maxOutputLength);
-
     // Merge stderr to stdout if requested
-    let finalStdout = truncatedStdout;
-    let finalStderr = truncatedStderr;
+    let finalStdout = stdout;
+    let finalStderr = stderr;
 
     if (submission.redirect_stderr_to_stdout) {
-      finalStdout = truncatedStdout + (truncatedStderr ? '\n' + truncatedStderr : '');
+      finalStdout = (stdout || '') + (stderr ? '\n' + stderr : '');
       finalStderr = null;
     }
 
+    // Judge the full output; the stored copy is truncated and would turn large correct answers into WA.
+    if (status.id === 3 && compareOutput(finalStdout, submission.expected_output) === false) {
+      status = getStatusById(4); // Wrong Answer
+    }
+
+    // Truncate output if too long
+    const maxOutputLength = 65536;
+
     return {
       status,
-      stdout: finalStdout || null,
-      stderr: finalStderr || null,
+      stdout: this.truncate(finalStdout, maxOutputLength) || null,
+      stderr: this.truncate(finalStderr, maxOutputLength) || null,
       compile_output: null,
       time: time ? time.toFixed(3) : null,
       wall_time: wallTime ? wallTime.toFixed(3) : null,

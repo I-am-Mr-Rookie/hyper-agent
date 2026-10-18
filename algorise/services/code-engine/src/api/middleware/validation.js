@@ -22,7 +22,8 @@ const submissionSchema = Joi.object({
   cpu_extra_time: Joi.number().min(0).max(5).default(1),
   wall_time_limit: Joi.number().min(0).max(config.execution.maxWallTimeLimit)
     .default(config.execution.defaultWallTimeLimit),
-  memory_limit: Joi.number().min(0).max(config.execution.maxMemoryLimit)
+  // Docker treats Memory=0 as unlimited and rejects anything under 6 MB.
+  memory_limit: Joi.number().min(6144).max(config.execution.maxMemoryLimit)
     .default(config.execution.defaultMemoryLimit),
   stack_limit: Joi.number().min(0).max(config.execution.defaultStackLimit)
     .default(config.execution.defaultStackLimit),
@@ -45,11 +46,11 @@ const submissionSchema = Joi.object({
         hostname.startsWith('127.') ||
         hostname.startsWith('[') || // IPv6 literals (e.g. [::1], [::ffff:127.0.0.1]) are not needed for callbacks
         hostname === '::1' ||
-        hostname === '0.0.0.0' ||
         hostname.startsWith('10.') ||
         hostname.startsWith('172.') ||
         hostname.startsWith('192.168.') ||
-        hostname === '169.254.169.254' ||
+        hostname.startsWith('169.254.') || // link-local, incl. cloud/ECS metadata endpoints
+        hostname.startsWith('0.') ||
         hostname.endsWith('.internal') ||
         hostname.endsWith('.local')
       ) {

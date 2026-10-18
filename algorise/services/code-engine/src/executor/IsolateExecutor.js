@@ -5,6 +5,7 @@ import { promisify } from 'util';
 import logger from '../utils/logger.js';
 import config from '../utils/config.js';
 import { getStatusById } from '../languages/index.js';
+import { compareOutput } from './ResultParser.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -370,18 +371,24 @@ class IsolateExecutor {
       status = getStatusById(11);           // NZEC
     }
 
-    // Truncate outputs
-    const maxLen = 65536;
     let stdout = result.stdout || null;
     let stderr = result.stderr || null;
-    if (stdout && stdout.length > maxLen) stdout = stdout.slice(0, maxLen) + '\n[truncated]';
-    if (stderr && stderr.length > maxLen) stderr = stderr.slice(0, maxLen) + '\n[truncated]';
 
     // Merge stderr into stdout if requested
     if (submission.redirect_stderr_to_stdout) {
       stdout = (stdout || '') + (stderr ? '\n' + stderr : '');
       stderr = null;
     }
+
+    // Judge the full output before truncating it for storage.
+    if (status.id === 3 && compareOutput(stdout, submission.expected_output) === false) {
+      status = getStatusById(4);            // Wrong Answer
+    }
+
+    // Truncate outputs
+    const maxLen = 65536;
+    if (stdout && stdout.length > maxLen) stdout = stdout.slice(0, maxLen) + '\n[truncated]';
+    if (stderr && stderr.length > maxLen) stderr = stderr.slice(0, maxLen) + '\n[truncated]';
 
     return {
       status,

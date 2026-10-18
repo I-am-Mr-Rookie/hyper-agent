@@ -35,4 +35,15 @@ describe("Import Companion pairing and upload store", () => {
     const result = extensionUploadSchema.safeParse({ platform: "codeforces", handle: "x", batch: [] });
     expect(result.success).toBe(false);
   });
+
+  it("rejects expired pairing codes and revoked tokens", () => {
+    const store = new ImportCompanionStore();
+    const { code } = store.createPairingCode("user-1", -1);
+    expect(() => store.exchangePairingCode(code)).toThrow(/invalid or expired/);
+
+    const { code: fresh } = store.createPairingCode("user-1");
+    const { token } = store.exchangePairingCode(` ${fresh.toLowerCase()} `);
+    store.revoke(token);
+    expect(() => store.authorize(token)).toThrow(/invalid or expired/);
+  });
 });
