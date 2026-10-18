@@ -26,8 +26,12 @@ export function PairingCard() {
   }
 
   async function copyCode() {
-    await navigator.clipboard.writeText(code);
-    setMessage("Copied. This code can be exchanged only once.");
+    try {
+      await navigator.clipboard.writeText(code);
+      setMessage("Copied. This code can be exchanged only once.");
+    } catch {
+      setMessage("Clipboard unavailable here. Select the code and copy it manually.");
+    }
   }
 
   return (
@@ -36,11 +40,11 @@ export function PairingCard() {
       <div className="pair-copy">
         <span className="kicker">Import Companion</span>
         <h3>Pair a private browser session</h3>
-        <p>{message}</p>
+        <p role="status">{message}</p>
         {expiresAt && <small>Expires {new Date(expiresAt).toLocaleTimeString()}</small>}
       </div>
       {code ? (
-        <button className="pair-code" onClick={copyCode} type="button"><code>{code}</code><Copy size={16} /></button>
+        <button className="pair-code" onClick={copyCode} type="button" aria-label={`Copy pairing code ${code}`}><code>{code}</code><Copy size={16} /></button>
       ) : (
         <button className="secondary-button" onClick={createCode} disabled={loading} type="button">
           {loading ? <LoaderCircle className="spin" size={17} /> : <KeyRound size={17} />} Generate code

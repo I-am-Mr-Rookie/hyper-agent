@@ -37,7 +37,7 @@ export default function HomePage() {
           <div className="trust-row"><ShieldCheck size={18} /><span>Evidence-backed coaching</span><i /><TerminalSquare size={18} /><span>Machine-verified verdicts</span></div>
         </div>
 
-        <div className="hero-console" aria-label="AlgoRise dashboard preview">
+        <figure className="hero-console" aria-label="AlgoRise dashboard preview">
           <div className="console-bar"><span /><span /><span /><code>learner / trajectory</code><b>DEMO DATA</b></div>
           <div className="console-grid">
             <div className="trajectory-card">
@@ -63,7 +63,7 @@ export default function HomePage() {
               <div><span>Implementation</span><strong>82</strong></div><div><span>Math</span><strong>61</strong></div><div><span>Graphs</span><strong className="warn">12</strong></div><div><span>DP</span><strong className="warn">18</strong></div>
             </div>
           </div>
-        </div>
+        </figure>
       </section>
 
       <section className="loop-section" id="loop">

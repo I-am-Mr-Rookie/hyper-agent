@@ -22,10 +22,11 @@ const week = [
 export default function DashboardPage() {
   return (
     <main className="workspace-shell">
+      <a className="skip-link" href="#workspace">Skip to workspace</a>
       <aside className="sidebar">
         <Logo />
-        <nav>
-          <Link className="active" href="/dashboard"><Radar size={18} /> Overview</Link>
+        <nav aria-label="Workspace">
+          <Link className="active" aria-current="page" href="/dashboard"><Radar size={18} /> Overview</Link>
           <a href="#roadmap"><Compass size={18} /> Roadmap</a>
           <a href="#import"><Code2 size={18} /> Import</a>
           <a href="#companion"><ShieldCheck size={18} /> Companion</a>
@@ -34,8 +35,8 @@ export default function DashboardPage() {
         <Link className="back-home" href="/"><ArrowLeft size={16} /> Product home</Link>
       </aside>
 
-      <section className="workspace-main">
-        <header className="workspace-header"><div><span className="kicker">Sample learner · demo data</span><h1>Good evening, founder.</h1><p>Here is the evidence-backed route this Sprint Zero scaffold can support.</p></div><div className="header-actions"><button className="icon-button" title="Repository"><GitBranch size={18} /></button><span className="local-chip"><i /> LOCAL</span></div></header>
+      <section className="workspace-main" id="workspace">
+        <header className="workspace-header"><div><span className="kicker">Sample learner · demo data</span><h1>Good evening, founder.</h1><p>Here is the evidence-backed route this Sprint Zero scaffold can support.</p></div><div className="header-actions"><button className="icon-button" type="button" aria-label="Repository (not connected yet)" title="Repository (not connected yet)" disabled><GitBranch size={18} /></button><span className="local-chip"><i /> LOCAL</span></div></header>
 
         <div className="metric-grid">
           <article className="metric hero-metric"><div className="metric-icon cyan"><Trophy size={20} /></div><span>Internal level</span><strong>620</strong><small>Beginner band · demo</small><div className="mini-progress"><i style={{ width: "62%" }} /></div></article>
@@ -50,7 +51,7 @@ export default function DashboardPage() {
             <div className="topic-list">
               {topics.map((topic) => <div className="topic-row" key={topic.name}><span>{topic.name}</span><div><i className={topic.state} style={{ width: `${topic.score}%` }} /></div><strong className={topic.state}>{topic.score}</strong></div>)}
             </div>
-            <div className="radar-insight"><Sparkles size={19} /><div><strong>Highest-leverage gap</strong><span>Graph fundamentals unlock shortest paths, trees, and a large 1200–1500 problem band.</span></div><button>View evidence <ArrowUpRight size={15} /></button></div>
+            <div className="radar-insight"><Sparkles size={19} /><div><strong>Highest-leverage gap</strong><span>Graph fundamentals unlock shortest paths, trees, and a large 1200–1500 problem band.</span></div><a href="#import">Import evidence <ArrowUpRight size={15} /></a></div>
           </section>
 
           <section className="panel coach-panel">
@@ -62,8 +63,8 @@ export default function DashboardPage() {
         </div>
 
         <section className="panel roadmap-panel" id="roadmap">
-          <div className="panel-heading"><div><span className="kicker">Personal route</span><h2>This week, with intent</h2></div><button className="secondary-button"><CalendarDays size={17} /> Asia/Dhaka</button></div>
-          <div className="week-grid">{week.map((item) => <article key={item.day} className={item.active ? "active" : item.done ? "done" : ""}><span>{item.day}</span>{item.done ? <CheckCircle2 size={20} /> : <CircleDashed size={20} />}<strong>{item.title}</strong><small>{item.detail}</small></article>)}</div>
+          <div className="panel-heading"><div><span className="kicker">Personal route</span><h2>This week, with intent</h2></div><span className="tz-chip" title="Plan time zone"><CalendarDays size={17} /> Asia/Dhaka</span></div>
+          <div className="week-grid">{week.map((item) => <article key={item.day} className={item.active ? "active" : item.done ? "done" : ""}><span>{item.day}</span><span className="sr-only">{item.done ? "Done" : item.active ? "In progress" : "Upcoming"}</span>{item.done ? <CheckCircle2 size={20} /> : <CircleDashed size={20} />}<strong>{item.title}</strong><small>{item.detail}</small></article>)}</div>
         </section>
 
         <section id="import" className="import-grid"><CodeforcesImport /><div className="import-aside"><div className="aside-top"><BookOpen size={22} /><span>What comes next</span></div><h3>Metadata builds the radar.<br />Your own code sharpens the coach.</h3><p>The official Codeforces API never exposes submission source. Use the consent-first extension only for your own signed-in account.</p><a href="#companion">Pair Import Companion <ArrowUpRight size={15} /></a></div></section>
